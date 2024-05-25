@@ -1,0 +1,11 @@
+<div class="start-view-container">
+    <img class="background-photo" src="../../assets/background.jpg">
+
+    <h1 class="welcome-header">Witamy w aplikacji 
+        <span class="app-title-string">Analytica!</span>
+    </h1>
+    <h2 class="hint-header">Wprowadź plik z danymi aby rozpocząć:</h2>
+
+    <button (click)="onFileButtonClick()" class="btn btn-secondary shadow file-input-button">Wybierz plik</button>
+    <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;">
+</div>
