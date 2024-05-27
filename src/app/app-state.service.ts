@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export class AppStateService {
   // False means disabled
+  // You can unlock to test some buttons
   private navButtonsState = new BehaviorSubject<{ [key: string]: boolean}>({
     "nav-data": false,
     "nav-normalize": false,
