@@ -8,7 +8,7 @@
       <ul class="navbar-nav ml-auto">
         <li *ngFor="let button of navButtons" class="nav-item">
             <a [routerLink]="button.route" (click)="navigateTo(button.route)" class="nav-link btn btn-primary btn-block"
-            [ngClass]="{'active': button.active, 'disabled': button.disabled}">
+            [ngClass]="{'active': button.active, 'disabled': isButtonDisabled(button.name)}">
                 {{ button.label }}
             </a>
         </li>
