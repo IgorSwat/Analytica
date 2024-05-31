@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FileUploadService } from '../file-upload.service'
 import { AppStateService } from '../app-state.service';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-start-view',
   templateUrl: './start-view.component.html',
@@ -10,7 +10,7 @@ import { AppStateService } from '../app-state.service';
 export class StartViewComponent {
   @ViewChild('fileInput', {static: false}) fileInput!: ElementRef;
 
-  constructor(private appStateService : AppStateService, private fileUploadService : FileUploadService) {}
+  constructor(private appStateService : AppStateService, private fileUploadService : FileUploadService, private router: Router) {}
 
   onFileButtonClick(): void {
     this.fileInput.nativeElement.click();
@@ -32,6 +32,7 @@ export class StartViewComponent {
     this.fileUploadService.uploadFile(file).subscribe(response => {
       console.log('File uploaded successfully', response);
       // Here redirect to /data route and unlock some buttons
+      this.router.navigate(['/data']);
     }, error => {
       console.error('Error uploading file', error);
     });

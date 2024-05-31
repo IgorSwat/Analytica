@@ -8,6 +8,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { StartViewComponent } from './start-view/start-view.component';
 import { DataViewComponent } from './data-view/data-view.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { DataViewerComponent } from './data-viewer/data-viewer.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
     NavbarComponent,
     StartViewComponent,
     DataViewComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
+    DataViewerComponent
   ],
   imports: [
     BrowserModule,

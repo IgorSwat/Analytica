@@ -1,0 +1,33 @@
+<div class="dataVisualizer">
+    <div *ngIf="data" class="dataVisualizerTable">
+        <h1>Wizualizacja danych</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <ng-container *ngFor="let column of data.columns; let idx = index">
+                        <th>{{ column }}</th>
+                    </ng-container>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let row of data.head; let rowIndex = index">
+                    <td>{{ rowIndex + 1 }}</td>
+                    <ng-container *ngFor="let cell of row; let cellIndex = index">
+                        <td>{{ cell }}</td>
+                    </ng-container>
+                </tr>
+                <tr *ngFor="let row of data.tail; let rowIndex = index">
+                    <td>{{ data.length - data.tail.length + rowIndex + 1 }}</td>
+                    <ng-container *ngFor="let cell of row; let cellIndex = index">
+                        <td>{{ cell }}</td>
+                    </ng-container>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div *ngIf="!data">
+        <p>Loading...</p>
+    </div>
+    
+</div>
