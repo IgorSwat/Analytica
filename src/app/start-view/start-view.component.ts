@@ -33,6 +33,8 @@ export class StartViewComponent {
       console.log('File uploaded successfully', response);
       // Here redirect to /data route and unlock some buttons
       this.router.navigate(['/data']);
+      this.appStateService.setNavButtonState('nav-data', true);
+      this.appStateService.setNavButtonState('nav-normalize', true);
     }, error => {
       console.error('Error uploading file', error);
     });
