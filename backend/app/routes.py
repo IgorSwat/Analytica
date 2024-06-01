@@ -37,13 +37,16 @@ def upload_file():
 @app.route("/data/visualize", methods=['GET'])
 def visualize_data():
     global df
-    rowAmt = df.shape[0]
+    row_amt = df.shape[0]
+
     cols = df.columns.values.tolist()
-    head = df.head(5).values.tolist()
-    tail = df.tail(5).values.tolist()
-    head = [[str(x) for x in row] for row in head]
-    tail = [[str(x) for x in row] for row in tail]
-    return jsonify(length=rowAmt,columns=cols,head=head,tail=tail),200
+
+    n = request.args.get('n', default=row_amt, type=int)
+    n = min(n, row_amt)
+
+    data = df.head(n).values.tolist()
+    data = [[str(x) for x in row] for row in data]
+    return jsonify(length=row_amt,columns=cols,data=data),200
     
 
 if __name__ == "__main__":
