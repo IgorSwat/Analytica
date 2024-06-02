@@ -13,8 +13,12 @@ export class DataService {
   maxNoRecords: number = 100;
 
   constructor(private http: HttpClient) { }
-  getData(noRecords: number = this.maxNoRecords): Observable<DataVisualization> {
-    const params = new HttpParams().set('n', noRecords.toString());
+  
+  getData(recordsSelection: string = ""): Observable<DataVisualization> {
+    if (recordsSelection == "")
+      recordsSelection = "1-" + this.maxNoRecords.toString();
+
+    const params = new HttpParams().set('selection', recordsSelection);
     return this.http.get<DataVisualization>(this.apiUrl, {params});
   }
   

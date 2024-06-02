@@ -7,3 +7,13 @@
 .static-icon {
     user-select: none;
 }
+
+/* Global info-button style, you can create specialized info-button styles in component's stylesheets */
+.info-button {
+    position: absolute;
+    z-index: 1;
+    background: none;
+    border: none;
+    outline: none;
+    border-radius: 50%;
+}
