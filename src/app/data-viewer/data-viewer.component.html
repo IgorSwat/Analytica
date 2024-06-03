@@ -22,7 +22,15 @@
                 <tr>
                     <th>Row</th>
                     <ng-container *ngFor="let column of data.columns; let idx = index">
-                        <th>{{ column }}</th>
+                        <th>
+                            {{ column }}
+                            <button *ngIf="featureLabels && featureLabels[idx].featureType != noneType" type="button" class="btn" 
+                                [ngClass]="{'btn-danger': featureLabels[idx].isNumeric(), 'btn-info': featureLabels[idx].isCategorical(),
+                                             'highlighted-button': isTypeMismatch(idx)}"
+                                (click)="featureLabels[idx].switchType()">
+                                {{featureLabels[idx].caption}}
+                            </button>
+                        </th>
                     </ng-container>
                 </tr>
             </thead>
@@ -36,8 +44,10 @@
             </tbody>
         </table>
     </div>
+    <button *ngIf="isDataChanged()" (click)="updateData()" type="button" class="btn btn-primary save-button" title="Zapisz zmiany">
+        <div class="material-symbols-outlined save-button-inner">upload</div>
+    </button>
     <div *ngIf="!data">
         <p>Loading...</p>
     </div>
-    
 </div>
