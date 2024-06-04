@@ -8,6 +8,7 @@ import csv
 
 from data_selection import parse_ranges, merge_ranges
 from data_properties import FeatureType
+from preprocess_types import select_types
 
 
 app = Flask(__name__)
@@ -38,10 +39,11 @@ def upload_file():
 
         no_columns = df.shape[1]
         # Only for testing purposes, should be replaced with automatic feature type extraction
-        feature_types = [FeatureType.NUMERIC.value for _ in range(no_columns)]
-        feature_types[0] = FeatureType.NONE.value
-        feature_types[1] = FeatureType.NONE.value
-        feature_types[9] = FeatureType.CATEGORICAL.value
+        # feature_types = [FeatureType.NUMERIC.value for _ in range(no_columns)]
+        # feature_types[0] = FeatureType.NONE.value
+        # feature_types[1] = FeatureType.NONE.value
+        # feature_types[9] = FeatureType.CATEGORICAL.value
+        feature_types = select_types(df)
 
         return {"message": "File processed successfully"}
 
