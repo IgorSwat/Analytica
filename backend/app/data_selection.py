@@ -1,3 +1,77 @@
+import pandas as pd
+from typing import List, Tuple
+
+from processor_base import Processor
+
+# PROCESSOR
+# Provides pieces of data specified by given ranges
+class DataSelector(Processor):
+
+    def __init__(self, ranges: List[Tuple[int, int]]):
+        super().__init__()
+        self.ranges = ranges
+
+        self.__merge_ranges()
+
+
+    def __call__(self, *args, **kwargs):
+        df = self.extract_arg(kwargs, "df", pd.DataFrame)
+        if df is None:
+            return None
+
+        row_amt = df.shape[0]
+        result = pd.DataFrame()
+        for data_range in self.ranges:
+            if data_range[1] >= row_amt:        # Be careful to not go beyond df size
+                if data_range[0] < row_amt:
+                    result = pd.concat([result, df.iloc[data_range[0]:data_range[1] + 1]])
+                break
+            result = pd.concat([result, df.iloc[data_range[0]:data_range[1] + 1]])
+
+        return result
+
+
+    def __merge_ranges(self):
+        # Sort by first value ascending, and then by second value descending
+        self.ranges.sort(key=lambda x: (x[0], -x[1]))
+
+        results = []
+        error_value = -3
+        min_bound, max_bound = error_value, error_value
+        for r in self.ranges:
+            if r[0] > max_bound + 1:
+                if min_bound != error_value:
+                    results.append((min_bound, max_bound))
+                min_bound = r[0]
+                max_bound = r[1]
+            elif r[1] > max_bound:
+                max_bound = r[1]
+        if min_bound != error_value:
+            results.append((min_bound, max_bound))
+
+        return results
+
+
+# PROCESSOR
+# Serializes DataFrame object into list of strings, which fulfills the jsonify() requirements
+class DataSerializer(Processor):
+
+    def __init__(self):
+        super().__init__()
+
+
+    def __call__(self, *args, **kwargs):
+        df = self.extract_arg(kwargs, "df", pd.DataFrame)
+        if df is None:
+            return None
+
+        listed_data = df.values.tolist()
+        result = [[str(x) for x in row] for row in listed_data]
+
+        return result
+
+
+# Ranges parsing
 # Returns ranges if command is correct, or None if parsing failed (incorrect command)
 def parse_ranges(cmd, data_size):
     if cmd == "#":
@@ -40,32 +114,3 @@ def parse_ranges(cmd, data_size):
             return None
 
     return ranges
-
-
-def merge_ranges(ranges: list):
-    # Sort by first value ascending, and then by second value descending
-    ranges.sort(key=lambda x: (x[0], -x[1]))
-
-    results = []
-    error_value = -3
-    min_bound, max_bound = error_value, error_value
-    for r in ranges:
-        if r[0] > max_bound + 1:
-            if min_bound != error_value:
-                results.append((min_bound, max_bound))
-            min_bound = r[0]
-            max_bound = r[1]
-        elif r[1] > max_bound:
-            max_bound = r[1]
-    if min_bound != error_value:
-        results.append((min_bound, max_bound))
-
-    return results
-
-
-# if __name__ == "__main__":
-#     cmd = "1-7, 5, 10-18"
-#     ranges = parse_ranges(cmd, 100)
-#     print("After parsing:", ranges)
-#     merged = merge_ranges(ranges)
-#     print("After merge:", merged)

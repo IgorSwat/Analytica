@@ -1,14 +1,12 @@
 import pandas as pd
-import numpy as np
-from flask import Flask, request, session, redirect, make_response, jsonify, send_file, render_template
-from flask_cors import CORS, cross_origin
-from io import StringIO
-import sys
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import csv
 
-from data_selection import parse_ranges, merge_ranges
-from data_properties import FeatureType
-from preprocess_types import select_types
+from flow import DataFlow
+from data_loading import DataProvider
+from types_extraction import FeatureTypeExtractor, FeatureTypeSerializer, FeatureType
+from data_selection import DataSelector, DataSerializer, parse_ranges
 
 
 app = Flask(__name__)
@@ -18,14 +16,12 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 app.secret_key = "TEST"
 
-df = pd.DataFrame()
-feature_types = None
+# This contains all data and implementation of all data processing methods
+flow = DataFlow()
 
 
 @app.route('/upload', methods=["POST"])
 def upload_file():
-    global df, feature_types
-
     if 'file' not in request.files:
         return {"reason" : "No file xselected"}, 400
     file = request.files['file']
@@ -37,13 +33,16 @@ def upload_file():
         dialect = csv.Sniffer().sniff(content.decode('utf-8'))
         df = pd.read_csv(file, delimiter=dialect.delimiter)
 
-        no_columns = df.shape[1]
-        # Only for testing purposes, should be replaced with automatic feature type extraction
-        # feature_types = [FeatureType.NUMERIC.value for _ in range(no_columns)]
-        # feature_types[0] = FeatureType.NONE.value
-        # feature_types[1] = FeatureType.NONE.value
-        # feature_types[9] = FeatureType.CATEGORICAL.value
-        feature_types = select_types(df)
+        flow.set_processor("raw_data", DataProvider(df))
+        flow.set_processor("extract_f_types", FeatureTypeExtractor())
+
+        # We can apply some of the other processors that do not require any specific parameters
+        flow.set_processor("serialize_f_types", FeatureTypeSerializer())
+        flow.set_processor("serialize_data", DataSerializer())
+
+        # IMPORTANT
+        # Process for the first time to load memory in nodes
+        flow.process("extract_f_types")
 
         return {"message": "File processed successfully"}
 
@@ -53,41 +52,40 @@ def upload_file():
 
 @app.route("/data/visualize", methods=['GET'])
 def visualize_data():
-    global df
-    row_amt = df.shape[0]
+    df = flow.process("raw_data")
 
+    row_amt = df.shape[0]
     cols = df.columns.values.tolist()
+
+    # Process in feature types serialization direction
+    serialized_feature_types = flow.process("serialize_f_types")
 
     selection = request.args.get('selection', default=row_amt, type=str)
     ranges = parse_ranges(selection, row_amt)   # Parse user command
     if ranges is None:                          # If user command is incorrect, return no data
-        return jsonify(length=row_amt, columns=cols, types=feature_types, data=[], error=True),200
+        return jsonify(length=row_amt, columns=cols, types=serialized_feature_types, data=[], error=True),200
 
-    merged_ranges = merge_ranges(ranges)        # Merge parsed ranges
-    data = []
-    for data_range in merged_ranges:
-        if data_range[1] >= row_amt:            # Be careful to not go beyond df size
-            if data_range[0] < row_amt:
-                data = data + df.iloc[data_range[0]:row_amt].values.tolist()
-            break
-        data = data + df.iloc[data_range[0]:data_range[1] + 1].values.tolist()
-    if len(data) > 0:
-        data = [[str(x) for x in row] for row in data]
+    # Apply new processor based on parsed ranges
+    # TODO: some possible optimizations here
+    flow.set_processor("select_data", DataSelector(ranges))
 
-    return jsonify(length=row_amt,columns=cols, types=feature_types, data=data, error=False),200
+    # Process in data serialization direction
+    serialized_data = flow.process("serialize_data")
+
+    return jsonify(length=row_amt,columns=cols, types=serialized_feature_types, data=serialized_data, error=False),200
 
 
 # It's possible to extend this functionality to edit the column names, but as we know, this is an optional feature :)
 @app.route("/data/update", methods=['PUT'])
 def update_data():
-    global df, feature_types
-
     # Update feature types
     new_types = request.get_json()
     if not new_types:
         return jsonify({"error": "Invalid input"}), 400
     if isinstance(new_types, list) and all(isinstance(item, int) for item in new_types):
-        feature_types = new_types
+        # Load to "extract_f_types" node's memory
+        feature_types = [FeatureType(t) for t in new_types]
+        flow.save_memory("extract_f_types", feature_types)
         return jsonify({"received": new_types}), 200
     else:
         return jsonify({"error": "Data should be a list of integers"}), 400
