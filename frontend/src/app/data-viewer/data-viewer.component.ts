@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { DataService } from '../data.service';
 import { DataVisualization } from '../models/data.model';
 import { FeatureType, FeatureLabel } from '../models/feature-types';
-
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { FormControl } from '@angular/forms';
 @Component({
   selector: 'app-data-viewer',
   templateUrl: './data-viewer.component.html',
@@ -14,8 +15,8 @@ export class DataViewerComponent {
   featureLabels: FeatureLabel[] | null = null;
   noneType = FeatureType.NONE;
 
-  inputValue: string = "";          // Bidirectional binding with row selection input element, stores the current value from input
-  lastInputValue: string = "";   // For optimization purposes to prevent unnecessary calls to backend that do not return different data
+  inputValue = new FormControl('');          // Bidirectional binding with row selection input element, stores the current value from input
+  lastInputValue: string = ''; // form control as string 
   inputErrorFlag: boolean = false;  // If input is incorrect and data not loaded properly, marks input bar as red
   
   infoText: string = "Przykład użycia:\n1-5, 20-40 (Wiersze 1-5 i 20-40)\n1-10, 12 (Wiersze 1-10 oraz 12-ty)\n# (Wszystkie wiersze)\n\n \
@@ -25,6 +26,15 @@ export class DataViewerComponent {
 
   ngOnInit() {
     this.loadData();
+
+    this.inputValue.valueChanges.pipe(
+      distinctUntilChanged() // Only unique values
+    ).subscribe(value => {
+      if (value !== null) {
+        this.onRefresh(value);
+      }
+    });
+    
   }
 
   loadData(selection: string = "") : void {
@@ -49,11 +59,13 @@ export class DataViewerComponent {
     }
   }
 
-  onRefresh() : void {
-    if (this.inputValue != this.lastInputValue) {
-      this.loadData(this.inputValue);
-      this.lastInputValue = this.inputValue;
+  onRefresh(newValue: string) : void {
+    if (newValue !== this.lastInputValue) {
+      this.lastInputValue = newValue;
+      this.loadData(newValue);
+     
     }
+    
   }
 
   isTypeMismatch(colID : number) : boolean {
