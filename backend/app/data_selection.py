@@ -78,6 +78,7 @@ def parse_ranges(cmd, data_size):
         return [(0, data_size - 1)]
 
     num1, num2 = "", ""
+    dash_flag = False
     ranges = []
 
     cmd += ","
@@ -99,7 +100,10 @@ def parse_ranges(cmd, data_size):
                     return None
                 ranges.append((int(num1) - 1, int(num1) - 1))
             else:
-                if int(num1) <= 0 or int(num2) <= 0:
+                if num1 == "":
+                    print("[COMMAND PARSER] Incorrect usage of '-'")
+                    return None
+                elif int(num1) <= 0 or int(num2) <= 0:
                     print("[COMMAND PARSER] Incorrect indices: you can use only positive values")
                     return None
                 elif int(num2) > int(num1):
