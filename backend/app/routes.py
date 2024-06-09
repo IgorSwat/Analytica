@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import csv
 
+from backend.app.data_normalization import DataNormalizer
 from flow import DataFlow
 from data_loading import DataProvider
 from types_extraction import FeatureTypeExtractor, FeatureTypeSerializer, FeatureType
@@ -38,7 +39,8 @@ def upload_file():
 
         # We can apply some of the other processors that do not require any specific parameters
         flow.set_processor("serialize_f_types", FeatureTypeSerializer())
-        flow.set_processor("serialize_data", DataSerializer())
+        flow.set_processor("serialize_data_1", DataSerializer())
+        flow.set_processor("serialize_data_2", DataSerializer())
 
         # IMPORTANT
         # Process for the first time to load memory in nodes
@@ -66,11 +68,10 @@ def visualize_data():
         return jsonify(length=row_amt, columns=cols, types=serialized_feature_types, data=[], error=True),200
 
     # Apply new processor based on parsed ranges
-    # TODO: some possible optimizations here
     flow.set_processor("select_data", DataSelector(ranges))
 
     # Process in data serialization direction
-    serialized_data = flow.process("serialize_data")
+    serialized_data = flow.process("serialize_data_1")
 
     return jsonify(length=row_amt,columns=cols, types=serialized_feature_types, data=serialized_data, error=False),200
 
@@ -89,7 +90,25 @@ def update_data():
         return jsonify({"received": new_types}), 200
     else:
         return jsonify({"error": "Data should be a list of integers"}), 400
-    
+
+
+@app.route("/data/normalize", methods=['GET'])
+def normalize_data():
+    # Get normalization type
+    numeric_method = request.args.get('numeric_method', default='standard', type=str)
+
+    # Replace the processor if needed
+    flow.set_processor("normalize_data", DataNormalizer(numeric_method))
+    results = flow.process("normalize_data")
+    if results is None:
+        return jsonify({"error": "Unable to normalize given data"}), 400
+
+    row_amt = results.shape[0]
+    cols = results.columns.values.tolist()
+    results_serialized = flow.process("serialize_data_2")
+
+    return jsonify(length=row_amt, columns=cols, data=results_serialized), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="localhost")

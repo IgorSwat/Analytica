@@ -28,7 +28,7 @@ class FeatureTypeExtractor(Processor):
 
         feature_types = []
         for column in df:
-            if self.__detect_id(df, column) or self.__detect_id(df, column):
+            if self.__detect_id(df, column) or self.__detect_timestamp(df, column):
                 feature_types.append(FeatureType.NONE)
             else:
                 feature_types.append(self.__get_type(df, column))

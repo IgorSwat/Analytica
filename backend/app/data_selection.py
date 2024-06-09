@@ -14,6 +14,10 @@ class DataSelector(Processor):
         self.__merge_ranges()
 
 
+    def __ne__(self, other):
+        return self.ranges != other.ranges
+
+
     def __call__(self, *args, **kwargs):
         df = self.extract_arg(kwargs, "df", pd.DataFrame)
         if df is None:

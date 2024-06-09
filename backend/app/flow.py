@@ -7,9 +7,10 @@ from collections import deque
 RAW_DATA_NODE = ("raw_data", "df")
 SELECT_DATA_NODE = ("select_data", "df")
 EXTRACT_TYPES_NODE = ("extract_f_types", "f_types")
-SERIALIZE_DATA_NODE = ("serialize_data", "df_serialized")
+SERIALIZE_DATA_NODE_1 = ("serialize_data_1", "df_serialized")
 SERIALIZE_TYPES_NODE = ("serialize_f_types", "types_serialized")
-NORMALIZE_DATA_NODE = ("normalize-data", "df_normalized")
+NORMALIZE_DATA_NODE = ("normalize_data", "df_normalized")
+SERIALIZE_DATA_NODE_2 = ("serialize_data_2", "df_serialized")
 # ........
 
 
@@ -60,15 +61,20 @@ class DataFlow:
             RAW_DATA_NODE[0]: DataNode(RAW_DATA_NODE),
             SELECT_DATA_NODE[0]: DataNode(SELECT_DATA_NODE),
             EXTRACT_TYPES_NODE[0]: DataNode(EXTRACT_TYPES_NODE),
-            SERIALIZE_DATA_NODE[0]: DataNode(SERIALIZE_DATA_NODE),
-            SERIALIZE_TYPES_NODE[0]: DataNode(SERIALIZE_TYPES_NODE)
+            SERIALIZE_DATA_NODE_1[0]: DataNode(SERIALIZE_DATA_NODE_1),
+            SERIALIZE_TYPES_NODE[0]: DataNode(SERIALIZE_TYPES_NODE),
+            NORMALIZE_DATA_NODE[0]: DataNode(NORMALIZE_DATA_NODE),
+            SERIALIZE_DATA_NODE_2[0]: DataNode(SERIALIZE_DATA_NODE_2)
         }
 
         # Define connections (edges in directed, acyclic graph)
         self.__make_connection(RAW_DATA_NODE[0], SELECT_DATA_NODE[0])
         self.__make_connection(RAW_DATA_NODE[0], EXTRACT_TYPES_NODE[0])
-        self.__make_connection(SELECT_DATA_NODE[0], SERIALIZE_DATA_NODE[0])
+        self.__make_connection(SELECT_DATA_NODE[0], SERIALIZE_DATA_NODE_1[0])
         self.__make_connection(EXTRACT_TYPES_NODE[0], SERIALIZE_TYPES_NODE[0])
+        self.__make_connection(SELECT_DATA_NODE[0], NORMALIZE_DATA_NODE[0])
+        self.__make_connection(EXTRACT_TYPES_NODE[0], NORMALIZE_DATA_NODE[0])
+        self.__make_connection(NORMALIZE_DATA_NODE[0], SERIALIZE_DATA_NODE_2[0])
 
 
     # This function process all the nodes that lead do node_id in the graph, by performing backpropagation
@@ -94,10 +100,12 @@ class DataFlow:
     def set_processor(self, node_id: str, processor: Any) -> None:
         if node_id in self.nodes:
             node = self.nodes[node_id]
-            node.processor = processor
             node.active = True
 
-            self.__reset_related_nodes(node_id, root_exc=False)
+            # TODO: Test this optimization for it's correctness
+            if node.processor is None or node.processor != processor:
+                node.processor = processor
+                self.__reset_related_nodes(node_id, root_exc=False)
 
 
     def activate_node(self, node_id: str) -> None:
