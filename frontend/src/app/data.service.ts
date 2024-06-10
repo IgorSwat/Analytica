@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DataVisualization } from './models/data.model';
+import { DataNormalization, DataVisualization } from './models/data.model';
 import { FeatureLabel } from './models/feature-types';
 
 @Injectable({
@@ -10,7 +10,7 @@ import { FeatureLabel } from './models/feature-types';
 export class DataService {
   private getDataUrl = 'http://localhost:5000/data/visualize';
   private updateDataUrl = 'http://localhost:5000/data/update';
-
+  private normalizeDataUrl = 'http://localhost:5000/data/normalize';
   // A customizable field, will be replaced by user input in near future
   maxNoRecords: number = 100;
 
@@ -33,5 +33,11 @@ export class DataService {
 
     return this.http.put(this.updateDataUrl, body, {headers});
   }
+  getNormalizedData(numericMethod: string = 'standard'): Observable<DataNormalization> {
+    const params = new HttpParams().set('numeric_method', numericMethod);
+    return this.http.get<DataNormalization>(this.normalizeDataUrl, {params});
+  }
+
+  
   
 }

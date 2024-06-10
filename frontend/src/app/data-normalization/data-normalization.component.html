@@ -1,0 +1,20 @@
+<div class="container">
+    <h1>Normalizacja Danych</h1>
+    <form (submit)="getNormalizedData()">
+      <label for="numericMethod">Metoda Normalizacji</label>
+      <select id="numericMethod" [(ngModel)]="numericMethod" name="numericMethod">
+        <option value="standard">Standard</option>
+        <option value="min-max">Min-Max</option>
+        <option value="robust">Robust</option>
+      </select>
+      <button type="submit">Normalizuj</button>
+    </form>
+  
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+  
+<div *ngIf="normalizedData">
+    <h2>Normalized Data</h2>
+    <pre>{{ normalizedData | json }}</pre>
+</div>

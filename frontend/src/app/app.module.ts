@@ -9,6 +9,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { StartViewComponent } from './start-view/start-view.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { DataViewerComponent } from './data-viewer/data-viewer.component';
+import { DataNormalizationComponent } from './data-normalization/data-normalization.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { DataViewerComponent } from './data-viewer/data-viewer.component';
     NavbarComponent,
     StartViewComponent,
     PageNotFoundComponent,
-    DataViewerComponent
+    DataViewerComponent,
+    DataNormalizationComponent
   ],
   imports: [
     BrowserModule,
