@@ -23,7 +23,9 @@ class DataProvider(Processor):
     # Fixes all incorrect float number patterns, such as "127,0003, as well as integers classified as strings"
     def fix_commas(self):
         bad_float_pattern = r"(-?\d+),(\d+)"
-        int_pattern = r"(-?\d+)"
+        int_pattern = r"^-?\d+$"
+
+        is_bad_float = lambda val: isinstance(val, str) and re.match(bad_float_pattern, val) is not None
 
         def map_bad_floats(val):
             if isinstance(val, str):
@@ -32,6 +34,15 @@ class DataProvider(Processor):
                     correct_val = float_match.group(1) + "." + float_match.group(2)
                     return float(correct_val)
 
+                int_match = re.match(int_pattern, val)
+                if int_match is not None:
+                    return float(val)
+
             return val
+
+        for column in self.df.columns:
+            has_bad_floats = self.df[column].apply(is_bad_float).any()
+            if has_bad_floats:
+                self.df[column] = self.df[column].apply(map_bad_floats)
 
         self.df = self.df.applymap(map_bad_floats)
