@@ -24,7 +24,7 @@ flow = DataFlow()
 @app.route('/upload', methods=["POST"])
 def upload_file():
     if 'file' not in request.files:
-        return {"reason" : "No file xselected"}, 400
+        return {"reason" : "No file selected"}, 400
     file = request.files['file']
     if file.filename == '':
         return {"reason" : "File not named"}, 400
@@ -34,7 +34,7 @@ def upload_file():
         dialect = csv.Sniffer().sniff(content.decode('utf-8'))
         df = pd.read_csv(file, delimiter=dialect.delimiter)
 
-        flow.set_processor("raw_data", DataProvider(df))
+        flow.set_processor("raw_data", DataProvider(df))    # You can switch off the comma fixes by using fix_commas=False
         flow.set_processor("extract_f_types", FeatureTypeExtractor())
 
         # We can apply some of the other processors that do not require any specific parameters

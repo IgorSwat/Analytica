@@ -98,11 +98,7 @@ class FeatureTypeExtractor(Processor):
         unique_threshold = unique_factor * ceil(log2(len(df_drop_na)))
 
         if isinstance(first_value, str):
-            non_numeric_chars = [c for c in first_value if not c.isnumeric() and c not in [',', '-']]
-            if len(non_numeric_chars) > 0:
-                return FeatureType.CATEGORICAL
-            else:
-                return FeatureType.NUMERIC
+            return FeatureType.CATEGORICAL
         else:
             n_unique = df_drop_na.nunique()
             return FeatureType.NUMERIC if n_unique >= unique_threshold else FeatureType.CATEGORICAL
