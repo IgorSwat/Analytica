@@ -39,8 +39,8 @@ def upload_file():
 
         # We can apply some of the other processors that do not require any specific parameters
         flow.set_processor("serialize_f_types", FeatureTypeSerializer())
-        flow.set_processor("serialize_data_1", DataSerializer())
-        flow.set_processor("serialize_data_2", DataSerializer())
+        flow.set_processor("serialize_data_1", DataSerializer(input_name="df"))
+        flow.set_processor("serialize_data_2", DataSerializer(input_name="df_normalized"))  # Remember to set a correct name!
 
         # IMPORTANT
         # Process for the first time to load memory in nodes

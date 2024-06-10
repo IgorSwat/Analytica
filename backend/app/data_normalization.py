@@ -36,9 +36,9 @@ class DataNormalizer(Processor):
         df_copy = df.copy()
         for i, col in enumerate(df.columns):
             if f_types[i] == FeatureType.NUMERIC:
-                df_copy[col] = self.normalize_numeric(df_copy[col])
+                df_copy[col] = self.normalize_numeric(df_copy[[col]])
             elif f_types[i] == FeatureType.CATEGORICAL:
-                df_copy[col] = self.normalize_categorical(df_copy[col])
+                df_copy[col] = self.normalize_categorical(df_copy[[col]])
 
         # Warning - this is optional and may be remover depending on future requirements
         # Remove 'none' type columns (like IDs or timestamps)
@@ -51,17 +51,13 @@ class DataNormalizer(Processor):
     def normalize_numeric(self, data):
         if self.numeric_method == "standard":
             scaler = StandardScaler()
-            scaled_data = scaler.fit_transform(data)
         elif self.numeric_method == "min-max":
             scaler = MinMaxScaler()
-            scaled_data = scaler.fit_transform(data)
         else:
             scaler = RobustScaler()
-            scaled_data = scaler.fit_transform(data)
-        return pd.DataFrame(scaled_data, columns=data.columns)
+        return scaler.fit_transform(data)
 
 
     def normalize_categorical(self, data):
         encoder = OneHotEncoder(sparse_output=False, drop="first")
-        encoded_data = encoder.fit_transform(data)
-        return pd.DataFrame(encoded_data, columns=data.columns)
+        return encoder.fit_transform(data)

@@ -60,12 +60,13 @@ class DataSelector(Processor):
 # Serializes DataFrame object into list of strings, which fulfills the jsonify() requirements
 class DataSerializer(Processor):
 
-    def __init__(self):
+    def __init__(self, input_name="df"):
         super().__init__()
+        self.input_name = input_name
 
 
     def __call__(self, *args, **kwargs):
-        df = self.extract_arg(kwargs, "df", pd.DataFrame)
+        df = self.extract_arg(kwargs, self.input_name, pd.DataFrame)
         if df is None:
             return None
 

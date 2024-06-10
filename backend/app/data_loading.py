@@ -32,10 +32,6 @@ class DataProvider(Processor):
                     correct_val = float_match.group(1) + "." + float_match.group(2)
                     return float(correct_val)
 
-                int_match = re.match(int_pattern, val)
-                if int_match is not None:
-                    return float(int_match.group(1))
-
             return val
 
         self.df = self.df.applymap(map_bad_floats)
