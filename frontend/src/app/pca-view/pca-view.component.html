@@ -33,8 +33,9 @@
             </button>
         </div>
         <div class="plot-area">
-            <div *ngIf="plotImage">
+            <div *ngIf="plotImage" class="plot-container">
                 <img [src]="plotImage" alt="Wykres PCA">
+                <button type="button" class="btn btn-light material-symbols-outlined" (click)="saveImage()">download</button>
             </div>
             <div class="plot-changer">
                 <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="prevPlot()">chevron_left</button>

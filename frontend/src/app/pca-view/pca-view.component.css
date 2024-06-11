@@ -15,6 +15,7 @@
 }
 
 .table-area {
+    height: auto;
     position: relative;
     border-radius: 8px;
     background-color: #ffffff;
@@ -61,7 +62,7 @@ thead {
 }
 
 th, td {
-    min-width: 200px;
+    min-width: 240px;
     border: 1px solid #e3e6f0;
     padding: 12px;
     text-align: left;
@@ -115,6 +116,19 @@ tbody tr:nth-child(even) {
     display: flex;
     flex-direction: column;
     align-items: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.185);
+}
+
+.plot-container {
+    position: relative;
+}
+
+.plot-container button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 20px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
 .plot-area img {
@@ -124,7 +138,7 @@ tbody tr:nth-child(even) {
 
 .plot-changer {
     width: 400px;
-    margin-top: 20px;
+    margin-top: 30px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -134,5 +148,5 @@ tbody tr:nth-child(even) {
     font-size: 36px;
     font-weight: bold;
     padding: 0px 8px;
-    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
 }

@@ -44,9 +44,14 @@
           </tbody>
         </table>
       </div>
-    <button *ngIf="isDataChanged()" (click)="updateData()" type="button" class="btn btn-primary save-button" title="Zapisz zmiany">
+    <div class="state-button-field">
+      <button *ngIf="isAnyDataLoaded()" (click)="downloadData()" type="button" class="btn btn-primary save-button" title="Eksportuj dane">
+        <div class="material-symbols-outlined save-button-inner">download</div>
+      </button>
+      <button *ngIf="isDataChanged()" (click)="updateData()" type="button" class="btn btn-primary save-button" title="Zapisz zmiany">
         <div class="material-symbols-outlined save-button-inner">check</div>
-    </button>
+      </button>
+    </div>
     <div *ngIf="!data">
         <p>Loading...</p>
     </div>

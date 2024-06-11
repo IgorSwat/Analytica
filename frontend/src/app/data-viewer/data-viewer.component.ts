@@ -95,6 +95,28 @@ export class DataViewerComponent {
     return false;
   }
 
+  downloadData() : void {
+    if (this.data != null) {
+      this.dataService.downloadData().subscribe({
+        next: (response) => {
+          // Create CSV file representation
+          const file = new Blob([response], { type: 'text/csv' });
+        
+          // Create virtual link
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(file);
+          link.download = 'data.csv';
+          link.click();
+        },
+        error: (err) => console.error('Error fetching data:', err)
+      });
+    }
+  }
+
+  isAnyDataLoaded() : boolean {
+    return this.data != null && this.data.data.length > 0;
+  }
+
   private loadFeatureTypes(data: DataVisualization) : void {
     this.featureLabels = new Array<FeatureLabel>();
     for (let type of data.types)

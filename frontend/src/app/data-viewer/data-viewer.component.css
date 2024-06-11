@@ -129,15 +129,25 @@ tbody tr:nth-child(even) {
     background-color: #ffffff;
 }
 
-.save-button {
-    padding: 5px 5px 0 5px;
+.state-button-field {
     position: absolute;
     right: 30px;
     bottom: 20px;
+    display: flex;
+    flex-direction: row;
+}
+
+.save-button {
+    margin-left: 20px;
+    padding: 5px 5px 0 5px;
     border-width: 4px;
     border-style: groove;
     border-color: #003670;
     box-shadow: 0 0 40px rgba(0, 238, 255, 0.7);
+}
+
+.save-button:first-child {
+    box-shadow: none;
 }
 
 .save-button div {

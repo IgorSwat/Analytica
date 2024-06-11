@@ -66,13 +66,24 @@ export class PcaViewComponent {
   }
 
   prevPlot() : void {
-    this.currentPlot = Math.max(this.currentPlot - 1, 0);
+    this.currentPlot = (this.currentPlot - 1) % this.MAX_NO_PLOTS;
     this.loadPlot();
   }
 
   nextPlot() : void {
     this.currentPlot = (this.currentPlot + 1) % this.MAX_NO_PLOTS;
     this.loadPlot();
+  }
+
+  saveImage() : void {
+    if (this.plotImage != null) {
+      const link = document.createElement('a');
+      link.href = this.plotImage;
+      link.download = "plot.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 
 }

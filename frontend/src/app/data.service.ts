@@ -11,8 +11,9 @@ export class DataService {
   private getDataUrl = 'http://localhost:5000/data/visualize';
   private updateDataUrl = 'http://localhost:5000/data/update';
   private normalizeDataUrl = 'http://localhost:5000/data/normalize';
-  private getPcaInfoUrl = 'http://localhost:5000/data/get-pca';
-  private getPcaPlotUrl = 'http://localhost:5000/data/pca-plot';
+  private downloadDataUrl = 'http://localhost:5000/data/download';
+  private getPcaInfoUrl = 'http://localhost:5000/data/pca/stats';
+  private getPcaPlotUrl = 'http://localhost:5000/data/pca/plot';
   private updateFeatureSelectionUrl = 'http://localhost:5000/data/select-features';
 
   // A customizable field, will be replaced by user input in near future
@@ -36,6 +37,10 @@ export class DataService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
     return this.http.put(this.updateDataUrl, body, {headers});
+  }
+
+  downloadData(): Observable<any> {
+    return this.http.get(this.downloadDataUrl, {responseType: 'blob'});
   }
 
   getNormalizedData(numericMethod: string = 'standard'): Observable<DataNormalization> {
