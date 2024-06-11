@@ -110,6 +110,14 @@ def normalize_data():
 
     return jsonify(length=row_amt, columns=cols, data=results_serialized), 200
 
+@app.route("/data/clusterize", methods=['GET'])
+def clusterize_data():
+    ...
+
+@app.route("/data/clusterize/cluster_plot", methods=['POST'])
+def plot_clusters():
+    ...
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="localhost")
