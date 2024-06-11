@@ -8,8 +8,8 @@ import { DataNormalizationComponent } from './data-normalization/data-normalizat
 
 // Routing paths
 const routes: Routes = [
-   {path: '', component: StartViewComponent},
-   {path: 'data', component: DataViewerComponent},
+   {path: '', component: StartViewComponent, data: { animation: 'OnePage' } },
+   {path: 'data', component: DataViewerComponent, data: { animation: 'AnotherPage' }},
    {path: 'normalize', component: DataNormalizationComponent},
    {path: '**', component: PageNotFoundComponent}
    

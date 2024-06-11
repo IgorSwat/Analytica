@@ -7,7 +7,7 @@
         <div class="input-field">
             <div class="outer-input">
               <input type="text" [formControl]="inputValue" placeholder="Podaj zakres danych do wyświetlania"
-                class="form-control inner-input" [ngClass]="{'inner-input-invalid': inputErrorFlag}">
+                class="form-control inner-input" [ngClass]="{'inner-input-invalid': inputErrorFlag}" >
               <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
                 [title]="infoText">info</button>
             </div>
@@ -16,34 +16,34 @@
             </button> -->
           </div>
     </div>
-    <div *ngIf="data" class="dataVisualizerTable">
+    <div *ngIf="data" class="dataVisualizerTable" @listAnimation>
         <table>
-            <thead>
-                <tr>
-                    <th>Row</th>
-                    <ng-container *ngFor="let column of data.columns; let idx = index">
-                        <th>
-                            {{ column }}
-                            <button *ngIf="featureLabels && featureLabels[idx].featureType != noneType" type="button" class="btn" 
-                                [ngClass]="{'btn-danger': featureLabels[idx].isNumeric(), 'btn-info': featureLabels[idx].isCategorical(),
-                                             'highlighted-button': isTypeMismatch(idx)}"
-                                (click)="featureLabels[idx].switchType()">
-                                {{featureLabels[idx].caption}}
-                            </button>
-                        </th>
-                    </ng-container>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let row of data.data; let rowIndex = index">
-                    <td>{{ rowIndex + 1 }}</td>
-                    <ng-container *ngFor="let cell of row; let cellIndex = index">
-                        <td>{{ cell }}</td>
-                    </ng-container>
-                </tr>
-            </tbody>
+          <thead>
+            <tr>
+              <th>Row</th>
+              <ng-container *ngFor="let column of data.columns; let idx = index">
+                <th>
+                  {{ column }}
+                  <button *ngIf="featureLabels && featureLabels[idx].featureType != noneType" type="button" class="btn" 
+                    [ngClass]="{'btn-danger': featureLabels[idx].isNumeric(), 'btn-info': featureLabels[idx].isCategorical(),
+                                'highlighted-button': isTypeMismatch(idx)}"
+                    (click)="featureLabels[idx].switchType()">
+                    {{featureLabels[idx].caption}}
+                  </button>
+                </th>
+              </ng-container>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of data.data; let rowIndex = index">
+              <td>{{ rowIndex + 1 }}</td>
+              <ng-container *ngFor="let cell of row; let cellIndex = index">
+                <td>{{ cell }}</td>
+              </ng-container>
+            </tr>
+          </tbody>
         </table>
-    </div>
+      </div>
     <button *ngIf="isDataChanged()" (click)="updateData()" type="button" class="btn btn-primary save-button" title="Zapisz zmiany">
         <div class="material-symbols-outlined save-button-inner">upload</div>
     </button>
