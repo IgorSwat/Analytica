@@ -72,7 +72,7 @@ class DataFlow:
             ANALYZE_PCA_NODE[0]: DataNode(ANALYZE_PCA_NODE),
             PLOT_PCA_NODE[0]: DataNode(PLOT_PCA_NODE),
             FEATURE_BANK_NODE[0]: DataNode(FEATURE_BANK_NODE),
-            SELECT_DATA_NODE[0]: DataNode(SELECT_FEATURES_NODE)
+            SELECT_FEATURES_NODE[0]: DataNode(SELECT_FEATURES_NODE)
         }
 
         # Define connections (edges in directed, acyclic graph)

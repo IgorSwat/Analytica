@@ -126,21 +126,20 @@ def get_pca_stats():
 
     # Extract and convert separate columns
     cols = df.columns.values.tolist()
-    variances = serialize_column(stats[:, 0])
-    loads1 = serialize_column(stats[:, 1])
-    loads2 = serialize_column(stats[:, 2])
+    loads1 = serialize_column(stats[:, 0])
+    loads2 = serialize_column(stats[:, 1])
 
     # Update feature selections if needed
     if flow.load_memory("feature_bank") is None:
         # Select 2 main components
-        indexed_variances = sorted(list(enumerate(variances)), key=lambda x: x[1], reverse=True)
+        indexed_variances = sorted(list(enumerate(loads1)), key=lambda x: x[1], reverse=True)
         two_main_components_ids = [item[0] for item in indexed_variances[:2]]
         # Create new selection list and new processor
-        auto_selection = [bool(i in two_main_components_ids) for i in range(len(variances))]
+        auto_selection = [bool(i in two_main_components_ids) for i in range(len(loads1))]
         flow.set_processor("feature_bank", FeatureBank(auto_selection))
     f_selection = flow.process("feature_bank")
 
-    return jsonify(columns=cols, variances=variances, loads1=loads1, loads2=loads2, selections=f_selection), 200
+    return jsonify(columns=cols, loads1=loads1, loads2=loads2, selections=f_selection), 200
 
 
 @app.route("/data/pca-plot", methods=['GET'])

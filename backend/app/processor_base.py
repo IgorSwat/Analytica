@@ -12,9 +12,9 @@ class Processor:
 
     def extract_arg(self, input, arg_name, arg_type):
         if arg_name not in input:
-            return self.set_error("'df' argument not provided")
+            return self.set_error(f"'{arg_name}' argument not provided")
         arg = input[arg_name]
         if not isinstance(arg, arg_type):
-            return self.set_error("'df' argument is not a DataFrame object")
+            return self.set_error(f"'Incorrect type of {arg_name}' argument")
 
         return arg

@@ -12,10 +12,11 @@ from processor_base import Processor
 # Base class for all PCA-like nodes
 class PcaTransformer(Processor):
 
-    # Allows to choose the number of components
-    def __init__(self, n_components=None):
+    # Allows to choose the number of components, as well as choose between fit and fit_transform
+    def __init__(self, n_components=None, transform=False):
         super().__init__()
         self.n_components = n_components
+        self.transform = transform
         self.pca = PCA(n_components=n_components) if n_components is not None else PCA()
 
 
@@ -24,7 +25,7 @@ class PcaTransformer(Processor):
         if df is None:
             return None
 
-        if self.n_components is not None:
+        if self.transform:
             return self.pca.fit_transform(df)
         else:
             self.pca.fit(df)
@@ -42,7 +43,7 @@ class PcaPlotter(PcaTransformer):
     def __init__(self, plot_id=0):
         plot_id = plot_id % len(self.available_plots)
 
-        super().__init__(n_components=self.available_plots[plot_id][1])
+        super().__init__(n_components=self.available_plots[plot_id][1], transform=True)
         self.plot_type = self.available_plots[plot_id][0]
 
 
@@ -51,7 +52,7 @@ class PcaPlotter(PcaTransformer):
 
 
     def __call__(self, *args, **kwargs):
-        principal_components = super().__call__(args=args, kwargs=kwargs)
+        principal_components = super().__call__(*args, **kwargs)
         loadings = self.pca.components_
 
         # Draw plot
@@ -115,25 +116,26 @@ class PcaAnalyzer(PcaTransformer):
 
     # We assume we calculate loading factors corresponding to 2 main components, you can adjust the parameter
     def __init__(self, no_load_factors=2):
-        super().__init__(n_components=no_load_factors)
+        super().__init__(n_components=no_load_factors, transform=False)
+        self.no_components = no_load_factors
 
 
     def __call__(self, *args, **kwargs):
-        super().__call__(args=args, kwargs=kwargs)
+        super().__call__(*args, **kwargs)
         df = self.extract_arg(kwargs, "df_normalized", pd.DataFrame)
         if df is None:
             return None
 
         # Calculate basic stats
-        explained_variance = self.pca.explained_variance_ratio_
+        # explained_variance = self.pca.explained_variance_ratio_
         loading_factors = self.pca.components_.T
 
         # Compose them into one matrix (numpy array)
-        results = np.zeros((df.shape[1], 3))
+        results = np.zeros((df.shape[1], 2))
         for i in range(df.shape[1]):
-            results[i, 0] = explained_variance[i]
-            results[i, 1] = loading_factors[i, 0]
-            results[i, 2] = loading_factors[i, 1]
+            #results[i, 0] = explained_variance[i]  # Warning - this results in a crash :(
+            results[i, 0] = loading_factors[i, 0]
+            results[i, 1] = loading_factors[i, 1]
 
         return results
 
