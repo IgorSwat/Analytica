@@ -11,6 +11,10 @@ SERIALIZE_DATA_NODE_1 = ("serialize_data_1", "df_serialized")
 SERIALIZE_TYPES_NODE = ("serialize_f_types", "types_serialized")
 NORMALIZE_DATA_NODE = ("normalize_data", "df_normalized")
 SERIALIZE_DATA_NODE_2 = ("serialize_data_2", "df_serialized")
+ANALYZE_PCA_NODE = ("analyze_pca", "pca_stats")
+PLOT_PCA_NODE = ("plot_pca", "plot_data")
+FEATURE_BANK_NODE = ("feature_bank", "f_selection")
+SELECT_FEATURES_NODE = ("select_features", "df_processed")
 # ........
 
 
@@ -64,7 +68,11 @@ class DataFlow:
             SERIALIZE_DATA_NODE_1[0]: DataNode(SERIALIZE_DATA_NODE_1),
             SERIALIZE_TYPES_NODE[0]: DataNode(SERIALIZE_TYPES_NODE),
             NORMALIZE_DATA_NODE[0]: DataNode(NORMALIZE_DATA_NODE),
-            SERIALIZE_DATA_NODE_2[0]: DataNode(SERIALIZE_DATA_NODE_2)
+            SERIALIZE_DATA_NODE_2[0]: DataNode(SERIALIZE_DATA_NODE_2),
+            ANALYZE_PCA_NODE[0]: DataNode(ANALYZE_PCA_NODE),
+            PLOT_PCA_NODE[0]: DataNode(PLOT_PCA_NODE),
+            FEATURE_BANK_NODE[0]: DataNode(FEATURE_BANK_NODE),
+            SELECT_DATA_NODE[0]: DataNode(SELECT_FEATURES_NODE)
         }
 
         # Define connections (edges in directed, acyclic graph)
@@ -75,6 +83,10 @@ class DataFlow:
         self.__make_connection(SELECT_DATA_NODE[0], NORMALIZE_DATA_NODE[0])
         self.__make_connection(EXTRACT_TYPES_NODE[0], NORMALIZE_DATA_NODE[0])
         self.__make_connection(NORMALIZE_DATA_NODE[0], SERIALIZE_DATA_NODE_2[0])
+        self.__make_connection(NORMALIZE_DATA_NODE[0], PLOT_PCA_NODE[0])
+        self.__make_connection(NORMALIZE_DATA_NODE[0], ANALYZE_PCA_NODE[0])
+        self.__make_connection(NORMALIZE_DATA_NODE[0], SELECT_FEATURES_NODE[0])
+        self.__make_connection(FEATURE_BANK_NODE[0], SELECT_FEATURES_NODE[0])
 
 
     # This function process all the nodes that lead do node_id in the graph, by performing backpropagation
