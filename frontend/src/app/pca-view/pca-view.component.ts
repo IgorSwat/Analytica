@@ -8,17 +8,14 @@ import { PcaInfo } from '../models/data.model';
   styleUrls: ['./pca-view.component.css']
 })
 export class PcaViewComponent {
-
-  // Test
-  data_test = new Array(20);
-
   pcaInfo: PcaInfo | null = null;
 
   featureStates: boolean[] = new Array(20).fill(true);
 
   // Plot state
+  plotImage: string | null = null;
   currentPlot: number = 0;
-  MAX_NO_PLOTS = 3;
+  MAX_NO_PLOTS: number = 3;
 
   // Info text
   infoText1 = "Wybierz zmienne do grupowania";
@@ -43,7 +40,8 @@ export class PcaViewComponent {
   loadPlot() : void {
     this.dataService.getPcaPlot(this.currentPlot).subscribe({
       next: (response) => {
-        console.log("I don't know what to do here :)");
+        this.plotImage = "data:image/png;base64," + response.image;
+        console.log("Plot succesfully loaded")
       },
       error: (err) => console.error('Error fetching data:', err)
     });
@@ -69,12 +67,12 @@ export class PcaViewComponent {
 
   prevPlot() : void {
     this.currentPlot = Math.max(this.currentPlot - 1, 0);
-    // Change the plot
+    this.loadPlot();
   }
 
   nextPlot() : void {
     this.currentPlot = (this.currentPlot + 1) % this.MAX_NO_PLOTS;
-    // Change the plot
+    this.loadPlot();
   }
 
 }

@@ -1,5 +1,5 @@
 <div class="content-container">
-    <div *ngIf="!pcaInfo" class="pca-content">
+    <div *ngIf="pcaInfo" class="pca-content">
         <div class="table-area">
             <div style="display: flex; align-items: center;">
                 <h1>Składowe główne</h1>
@@ -11,18 +11,18 @@
                     <thead>
                         <tr>
                             <th>Nazwa cechy</th>
-                            <th>Ważność 1</th>
-                            <th>Ważność 2</th>
+                            <th>Obciążenie (składowa 1)</th>
+                            <th>Obciążenie (składowa 2)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let elem of data_test; let idx = index">
+                        <tr *ngFor="let feature of pcaInfo.columns; let idx = index">
                             <td>
-                                Cecha Dupa
+                                {{feature}}
                                 <input type="checkbox" class="form-check-input" [(ngModel)]="featureStates[idx]">
                             </td>
-                            <td>0.33</td>
-                            <td>0.69</td>
+                            <td>{{pcaInfo.loads1[idx]}}</td>
+                            <td>{{pcaInfo.loads2[idx]}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -33,14 +33,16 @@
             </button>
         </div>
         <div class="plot-area">
-            <img src="../../assets/placeholder.png">
+            <div *ngIf="plotImage">
+                <img [src]="plotImage" alt="Wykres PCA">
+            </div>
             <div class="plot-changer">
                 <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="prevPlot()">chevron_left</button>
                 <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="nextPlot()">chevron_right</button>
             </div>
         </div>
     </div>
-    <div *ngIf="pcaInfo" class="loading-label">
+    <div *ngIf="!pcaInfo" class="loading-label">
         <p>Loading...</p>
     </div>
 </div>

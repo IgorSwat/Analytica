@@ -11,7 +11,7 @@ export interface DataVisualization extends DataNormalization {
 
 export interface PcaInfo {
   columns: string[],
-  variances: number[],
-  loads: number[],
+  loads1: number[],
+  loads2: number[],
   selections: boolean[]
 }

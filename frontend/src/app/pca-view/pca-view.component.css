@@ -61,7 +61,7 @@ thead {
 }
 
 th, td {
-    min-width: 240px;
+    min-width: 200px;
     border: 1px solid #e3e6f0;
     padding: 12px;
     text-align: left;
@@ -74,7 +74,7 @@ td input {
 }
 
 th:first-child, td:first-child {
-    min-width: 300px;
+    min-width: 280px;
 }
 
 th {
