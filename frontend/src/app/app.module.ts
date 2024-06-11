@@ -10,6 +10,7 @@ import { StartViewComponent } from './start-view/start-view.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { DataViewerComponent } from './data-viewer/data-viewer.component';
 import { DataNormalizationComponent } from './data-normalization/data-normalization.component';
+import { PcaViewComponent } from './pca-view/pca-view.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { DataNormalizationComponent } from './data-normalization/data-normalizat
     StartViewComponent,
     PageNotFoundComponent,
     DataViewerComponent,
-    DataNormalizationComponent
+    DataNormalizationComponent,
+    PcaViewComponent
   ],
   imports: [
     BrowserModule,

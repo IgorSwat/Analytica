@@ -1,6 +1,3 @@
-
-
-
 export interface DataNormalization {
   length: number;
   columns: string[];
@@ -10,4 +7,11 @@ export interface DataNormalization {
 
 export interface DataVisualization extends DataNormalization {
   types: number[]
+}
+
+export interface PcaInfo {
+  columns: string[],
+  variances: number[],
+  loads: number[],
+  selections: boolean[]
 }

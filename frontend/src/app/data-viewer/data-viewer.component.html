@@ -1,4 +1,4 @@
-<div class="dataVisualizer">
+<div class="content-container">
     <div class="data-header">
         <div class="title-field">
             <h1>Wizualizacja danych</h1>
@@ -45,7 +45,7 @@
         </table>
     </div>
     <button *ngIf="isDataChanged()" (click)="updateData()" type="button" class="btn btn-primary save-button" title="Zapisz zmiany">
-        <div class="material-symbols-outlined save-button-inner">upload</div>
+        <div class="material-symbols-outlined save-button-inner">check</div>
     </button>
     <div *ngIf="!data">
         <p>Loading...</p>

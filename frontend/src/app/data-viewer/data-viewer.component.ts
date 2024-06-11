@@ -4,11 +4,13 @@ import { DataVisualization } from '../models/data.model';
 import { FeatureType, FeatureLabel } from '../models/feature-types';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
+
 @Component({
   selector: 'app-data-viewer',
   templateUrl: './data-viewer.component.html',
   styleUrls: ['./data-viewer.component.css']
 })
+
 export class DataViewerComponent {
   data: DataVisualization | null = null;
 
@@ -55,7 +57,7 @@ export class DataViewerComponent {
           this.loadData(this.lastInputValue);
         },
         error: (err) => console.error('Error fetching data:', err)
-      })
+      });
     }
   }
 
@@ -63,9 +65,7 @@ export class DataViewerComponent {
     if (newValue !== this.lastInputValue) {
       this.lastInputValue = newValue;
       this.loadData(newValue);
-     
     }
-    
   }
 
   isTypeMismatch(colID : number) : boolean {
