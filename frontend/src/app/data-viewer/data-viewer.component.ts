@@ -4,11 +4,24 @@ import { DataVisualization } from '../models/data.model';
 import { FeatureType, FeatureLabel } from '../models/feature-types';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
+import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
 
 @Component({
   selector: 'app-data-viewer',
   templateUrl: './data-viewer.component.html',
-  styleUrls: ['./data-viewer.component.css']
+  styleUrls: ['./data-viewer.component.css'],
+  animations: [
+    trigger('listAnimation', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(-15px)' }),
+          stagger('50ms', [
+            animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+          ])
+        ], { optional: true })
+      ])
+    ])
+  ]
 })
 
 export class DataViewerComponent {

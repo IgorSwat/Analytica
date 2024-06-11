@@ -1,44 +1,77 @@
 .start-view-container {
+    position: relative;
     width: 100%;
-    height: 100%;
-
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    color: #fff; /* Ensure text is white for contrast */
 }
 
-.background-photo {
-    width: 100vw;
-    height: 92vh;
-
+.background-video {
     position: absolute;
+    top: 0;
     left: 0;
-    top: 8vh;
-
-    opacity: 75%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     z-index: -1;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2); 
+    z-index: 0;
 }
 
 .welcome-header {
     font-size: 64px;
     margin-bottom: 10vh;
+    position: relative;
+    z-index: 1;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .app-title-string {
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+    font-size: 64px;
+    background: linear-gradient(90deg, #1e90ff, #00bfff);
+    -webkit-background-clip: text;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
 }
 
 .hint-header {
     font-size: 28px;
     margin-bottom: 3vh;
+    position: relative;
+    z-index: 1;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .file-input-button {
     width: 7%;
     height: 7%;
     margin-bottom: 20vh;
-
     font-size: 18px;
     font-weight: bold;
+    position: relative;
+    z-index: 1;
+    color: #333;
+    background-color: #1e90ff; 
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+}
+
+.file-input-button:hover {
+    background-color: #00bfff; 
 }
