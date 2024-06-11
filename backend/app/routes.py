@@ -1,9 +1,8 @@
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
+from io import BytesIO
 import csv
-
-from seaborn._core.plot import Plotter
 
 from backend.app.data_normalization import DataNormalizer
 from flow import DataFlow
@@ -96,6 +95,23 @@ def update_data():
         return jsonify({"error": "Data should be a list of integers"}), 400
 
 
+# Return a CSV object
+@app.route("/data/download", methods=['GET'])
+def download_data():
+    df = flow.process("select_data")
+    if df is None:
+        return jsonify({"error": "No data"}), 400
+
+    csv_data = df.to_csv(index=False)
+
+    return send_file(
+        BytesIO(csv_data.encode("utf-8")),
+        mimetype='text/csv',
+        download_name='data.csv',
+        as_attachment=True
+    )
+
+
 @app.route("/data/normalize", methods=['GET'])
 def normalize_data():
     # Get normalization type
@@ -114,7 +130,7 @@ def normalize_data():
     return jsonify(length=row_amt, columns=cols, data=results_serialized), 200
 
 
-@app.route("/data/get-pca", methods=['GET'])
+@app.route("/data/pca/stats", methods=['GET'])
 def get_pca_stats():
     stats = flow.process("analyze_pca")
     df = flow.load_memory("normalize_data")
@@ -131,18 +147,18 @@ def get_pca_stats():
 
     # Update feature selections if needed
     if flow.load_memory("feature_bank") is None:
-        # Select 2 main components
-        indexed_variances = sorted(list(enumerate(loads1)), key=lambda x: x[1], reverse=True)
+        # Select 2 most significant features
+        indexed_variances = sorted(list(enumerate(stats[:, 0])), key=lambda x: abs(x[1]), reverse=True)
         two_main_components_ids = [item[0] for item in indexed_variances[:2]]
         # Create new selection list and new processor
-        auto_selection = [bool(i in two_main_components_ids) for i in range(len(loads1))]
+        auto_selection = [bool(i in two_main_components_ids) for i in range(len(stats[:, 0]))]
         flow.set_processor("feature_bank", FeatureBank(auto_selection))
     f_selection = flow.process("feature_bank")
 
     return jsonify(columns=cols, loads1=loads1, loads2=loads2, selections=f_selection), 200
 
 
-@app.route("/data/pca-plot", methods=['GET'])
+@app.route("/data/pca/plot", methods=['GET'])
 def get_pca_plot():
     # Obtain plot index
     plot_id = request.args.get("plot_id", default=0, type=int)

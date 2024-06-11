@@ -37,8 +37,8 @@ class PcaTransformer(Processor):
 class PcaPlotter(PcaTransformer):
 
     # Customizable parameters
-    available_plots = [("scatter-2D", 2), ("heatmap", None), ("biplot", 2)]     # plot_name and n_components
-    plot_size = (8, 6)
+    available_plots = [("scatter-2D", 2), ("heatmap", None), ("screeplot", 2)]     # plot_name and n_components
+    plot_size = (9, 7)
 
     def __init__(self, plot_id=0):
         plot_id = plot_id % len(self.available_plots)
@@ -52,8 +52,13 @@ class PcaPlotter(PcaTransformer):
 
 
     def __call__(self, *args, **kwargs):
+        df = self.extract_arg(kwargs, "df_normalized", pd.DataFrame)
         principal_components = super().__call__(*args, **kwargs)
+        if df is None or principal_components is None:
+            return None
+
         loadings = self.pca.components_
+        explained_variance = self.pca.explained_variance_ratio_
 
         # Draw plot
         if self.plot_type == "scatter-2D":
@@ -63,11 +68,11 @@ class PcaPlotter(PcaTransformer):
         elif self.plot_type == "heatmap":
             if loadings is None:
                 return self.set_error("Invalid configuration for plot: " + self.plot_type)
-            self.__draw_heatmap(loadings)
+            self.__draw_heatmap(df.columns.values.tolist(), loadings)
         else:
             if principal_components is None or loadings is None:
                 return self.set_error("Invalid configuration for plot: " + self.plot_type)
-            self.__draw_biplot(principal_components, loadings)
+            self.__draw_screeplot(explained_variance)
 
         # Save plot as bytes
         img = io.BytesIO()
@@ -81,16 +86,16 @@ class PcaPlotter(PcaTransformer):
     def __draw_scatter_2d(self, principal_components):
         plt.figure(figsize=self.plot_size)
         plt.scatter(principal_components[:, 0], principal_components[:, 1], s=50)
-        plt.title("PCA - Dwa pierwsze główne składowe")
+        plt.title("PCA - Dwie pierwsze główne składowe")
         plt.xlabel("Główna składowa 1")
         plt.ylabel("Główna składowa 2")
         plt.grid()
 
 
-    def __draw_heatmap(self, loadings):
+    def __draw_heatmap(self, feature_labels, loadings):
         plt.figure(figsize=self.plot_size)
         sns.heatmap(loadings, annot=True, cmap="coolwarm",
-                    xticklabels=["Feature 1", "Feature 2", "Feature 3"],
+                    xticklabels=feature_labels,
                     yticklabels=[f"PC{i+1}" for i in range(loadings.shape[0])])
         plt.title("Heatmapa współczynników obciążenia (Loading Factors)")
         plt.xlabel("Cechy")
@@ -98,15 +103,13 @@ class PcaPlotter(PcaTransformer):
 
 
     # Might cause some errors
-    def __draw_biplot(self, principal_components, loadings):
+    def __draw_screeplot(self, explained_variance):
         plt.figure(figsize=self.plot_size)
-        plt.scatter(principal_components[:, 0], principal_components[:, 1], s=50)
-        for i, feature in enumerate(['Feature 1', 'Feature 2', 'Feature 3']):
-            plt.arrow(0, 0, loadings[0, i], loadings[1, i], color='r', alpha=0.5)
-            plt.text(loadings[0, i] * 1.15, loadings[1, i] * 1.15, feature, color='g', ha='center', va='center')
-        plt.title("Biplot PCA")
-        plt.xlabel("Główna Składowa 1")
-        plt.ylabel("Główna Składowa 2")
+        plt.plot(np.arange(1, len(explained_variance) + 1), explained_variance, marker='o', linestyle='--', color='b')
+        plt.title('Scree Plot')
+        plt.xlabel('Składowa główna')
+        plt.ylabel('Współczynnik wyjaśnialnej wariancji')
+        plt.xticks(np.arange(1, len(explained_variance) + 1))
         plt.grid()
 
 
@@ -127,13 +130,11 @@ class PcaAnalyzer(PcaTransformer):
             return None
 
         # Calculate basic stats
-        # explained_variance = self.pca.explained_variance_ratio_
         loading_factors = self.pca.components_.T
 
         # Compose them into one matrix (numpy array)
         results = np.zeros((df.shape[1], 2))
         for i in range(df.shape[1]):
-            #results[i, 0] = explained_variance[i]  # Warning - this results in a crash :(
             results[i, 0] = loading_factors[i, 0]
             results[i, 1] = loading_factors[i, 1]
 
