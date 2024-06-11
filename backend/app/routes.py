@@ -3,6 +3,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import csv
 
+from seaborn._core.plot import Plotter
+
 from backend.app.data_normalization import DataNormalizer
 from flow import DataFlow
 from data_loading import DataProvider
@@ -42,6 +44,7 @@ def upload_file():
         flow.set_processor("serialize_f_types", FeatureTypeSerializer())
         flow.set_processor("serialize_data_1", DataSerializer(input_name="df"))
         flow.set_processor("serialize_data_2", DataSerializer(input_name="df_normalized"))  # Remember to set a correct name!
+        flow.set_processor("analyze_pca", PcaAnalyzer())
 
         # IMPORTANT
         # Process for the first time to load memory in nodes
@@ -84,7 +87,7 @@ def update_data():
     new_types = request.get_json()
     if not new_types:
         return jsonify({"error": "Invalid input"}), 400
-    if isinstance(new_types, list) and all(isinstance(item, int) for item in new_types):
+    elif isinstance(new_types, list) and all(isinstance(item, int) for item in new_types):
         # Load to "extract_f_types" node's memory
         feature_types = [FeatureType(t) for t in new_types]
         flow.save_memory("extract_f_types", feature_types)
@@ -110,9 +113,67 @@ def normalize_data():
 
     return jsonify(length=row_amt, columns=cols, data=results_serialized), 200
 
+
+@app.route("/data/get-pca", methods=['GET'])
+def get_pca_stats():
+    stats = flow.process("analyze_pca")
+    df = flow.load_memory("normalize_data")
+    if df is None or stats is None:
+        return jsonify({"error": "Unable to perform PCA on given data"}), 400
+
+    def serialize_column(column):
+        return [str(element) for element in column]
+
+    # Extract and convert separate columns
+    cols = df.columns.values.tolist()
+    variances = serialize_column(stats[:, 0])
+    loads1 = serialize_column(stats[:, 1])
+    loads2 = serialize_column(stats[:, 2])
+
+    # Update feature selections if needed
+    if flow.load_memory("feature_bank") is None:
+        # Select 2 main components
+        indexed_variances = sorted(list(enumerate(variances)), key=lambda x: x[1], reverse=True)
+        two_main_components_ids = [item[0] for item in indexed_variances[:2]]
+        # Create new selection list and new processor
+        auto_selection = [bool(i in two_main_components_ids) for i in range(len(variances))]
+        flow.set_processor("feature_bank", FeatureBank(auto_selection))
+    f_selection = flow.process("feature_bank")
+
+    return jsonify(columns=cols, variances=variances, loads1=loads1, loads2=loads2, selections=f_selection), 200
+
+
+@app.route("/data/pca-plot", methods=['GET'])
+def get_pca_plot():
+    # Obtain plot index
+    plot_id = request.args.get("plot_id", default=0, type=int)
+
+    # Generate plot data
+    flow.set_processor("plot_pca", PcaPlotter(plot_id))
+    binary_data = flow.process("plot_pca")
+    if binary_data is None:
+        return jsonify({"error": f"Unable to generate plot nr {plot_id}"}), 400
+
+    return jsonify({'image': binary_data}), 200
+
+
+@app.route("/data/select-features", methods=['PUT'])
+def update_feature_selection():
+    selections = request.get_json()
+
+    if not selections:
+        return jsonify({"error": "Invalid input"}), 400
+    elif isinstance(selections, list) and all(isinstance(item, bool) for item in selections):
+        flow.set_processor("feature_bank", FeatureBank(selections))
+        return jsonify({"received": selections}), 200
+    else:
+        return jsonify({"error": "Data should be a list of boolean values"}), 400
+
+
 @app.route("/data/clusterize", methods=['GET'])
 def clusterize_data():
     ...
+
 
 @app.route("/data/clusterize/cluster_plot", methods=['POST'])
 def plot_clusters():
