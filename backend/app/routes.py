@@ -4,6 +4,7 @@ from flask_cors import CORS
 from io import BytesIO
 import csv
 
+
 # from backend.app.data_normalization import DataNormalizer
 from data_normalization import DataNormalizer
 from flow import DataFlow
@@ -13,7 +14,6 @@ from types_extraction import FeatureTypeExtractor, FeatureTypeSerializer, Featur
 from data_selection import DataSelector, FeatureSelector, DataSerializer, parse_ranges
 from pca import PcaAnalyzer, PcaPlotter, OnlyPCA
 from data_clustering import ClusterPlotter, DataClusterizer
-
 
 
 app = Flask(__name__)
@@ -51,7 +51,6 @@ def upload_file():
         flow.set_processor("serialize_data_2", DataSerializer(input_name="df_normalized"))  # Remember to set a correct name!
         flow.set_processor("analyze_pca", PcaAnalyzer())
         flow.set_processor("select_features_2", FeatureSelector(input_name="df_normalized"))
-
         flow.set_processor("return_pca_data", OnlyPCA())
 
         # IMPORTANT

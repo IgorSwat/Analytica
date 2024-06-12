@@ -1,0 +1,19 @@
+/* You can add global styles to this file, and also import other style files */
+
+.body {
+    margin: 0;
+}
+
+.static-icon {
+    user-select: none;
+}
+
+/* Global info-button style, you can create specialized info-button styles in component's stylesheets */
+.info-button {
+    position: absolute;
+    z-index: 1;
+    background: none;
+    border: none;
+    outline: none;
+    border-radius: 50%;
+}
