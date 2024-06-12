@@ -29,11 +29,11 @@ export class DataService {
     return this.http.get<DataVisualization>(this.getDataUrl, {params});
   }
 
-  updateData(featureLabels: FeatureLabel[]): Observable<any> {  
+  updateData(featureLabels: FeatureLabel[], featureStates: boolean[]): Observable<any> {  
     const paramArray : number[] = Array.from({length: featureLabels.length}, (_, index) => {
       return <number>featureLabels[index].featureType;
     })
-    const body = JSON.stringify(paramArray);
+    const body = JSON.stringify({"types": paramArray, "states": featureStates});
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
     return this.http.put(this.updateDataUrl, body, {headers});

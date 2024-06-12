@@ -6,7 +6,8 @@ export interface DataNormalization {
 }
 
 export interface DataVisualization extends DataNormalization {
-  types: number[]
+  types: number[],             // Feature types
+  states: boolean[]            // Feature states
 }
 
 export interface PcaInfo {

@@ -28,6 +28,7 @@ export class DataViewerComponent {
   data: DataVisualization | null = null;
 
   featureLabels: FeatureLabel[] | null = null;
+  featureStates: boolean[] | null = null;
   noneType = FeatureType.NONE;
 
   inputValue = new FormControl('');          // Bidirectional binding with row selection input element, stores the current value from input
@@ -56,7 +57,8 @@ export class DataViewerComponent {
     this.dataService.getData(selection).subscribe({
       next: (data) => {
         this.data = data;
-        this.loadFeatureTypes(data);
+        this.featureLabels = this.data.types.map((value) => {return new FeatureLabel(<FeatureType>value);});
+        this.featureStates = [...this.data.states];
         this.inputErrorFlag = data.error;
       },
       error: (err) => console.error('Error fetching data:', err),
@@ -64,35 +66,14 @@ export class DataViewerComponent {
   }
 
   updateData() : void {
-    if (this.featureLabels) {
-      this.dataService.updateData(this.featureLabels).subscribe({
+    if (this.featureLabels && this.featureStates) {
+      this.dataService.updateData(this.featureLabels, this.featureStates).subscribe({
         next: (response) => {
           this.loadData(this.lastInputValue);
         },
         error: (err) => console.error('Error fetching data:', err)
       });
     }
-  }
-
-  onRefresh(newValue: string) : void {
-    if (newValue !== this.lastInputValue) {
-      this.lastInputValue = newValue;
-      this.loadData(newValue);
-    }
-  }
-
-  isTypeMismatch(colID : number) : boolean {
-    return this.data != null && this.featureLabels != null && this.featureLabels[colID].featureType != <FeatureType>this.data.types[colID];
-  }
-
-  isDataChanged() : boolean {
-    if (this.data != null && this.featureLabels != null) {
-      for (let id = 0; id < this.data.types.length; id++) {
-        if (this.isTypeMismatch(id))
-          return true;
-      }
-    }
-    return false;
   }
 
   downloadData() : void {
@@ -113,14 +94,42 @@ export class DataViewerComponent {
     }
   }
 
+  onRefresh(newValue: string) : void {
+    if (newValue !== this.lastInputValue) {
+      this.lastInputValue = newValue;
+      this.loadData(newValue);
+    }
+  }
+
+  isDataChanged() : boolean {
+    if (this.data != null && this.featureLabels != null) {
+      for (let id = 0; id < this.data.types.length; id++) {
+        if (this.isTypeMismatch(id) || this.isStateMismatch(id))
+          return true;
+      }
+    }
+    return false;
+  }
+
   isAnyDataLoaded() : boolean {
     return this.data != null && this.data.data.length > 0;
   }
 
-  private loadFeatureTypes(data: DataVisualization) : void {
-    this.featureLabels = new Array<FeatureLabel>();
-    for (let type of data.types)
-      this.featureLabels.push(new FeatureLabel(<FeatureType>type));
+  isTypeMismatch(colID : number) : boolean {
+    return this.featureLabels![colID].featureType != <FeatureType>this.data!.types[colID];
+  }
+
+  isStateMismatch(colID: number) : boolean {
+    return this.featureStates![colID] != this.data!.states[colID];
   }
   
+  isColumnInactive(colID: number) : boolean {
+    return this.featureStates != null && !this.featureStates[colID];
+  }
+
+  switchColumnState(colID: number) : void {
+    if (this.featureStates != null)
+      this.featureStates[colID] = !this.featureStates[colID];
+  }
+
 }

@@ -105,6 +105,7 @@ th, td {
 }
 
 th {
+    position: relative;
     background-color: #0056b3;
     color: white;
     font-size: 16px;
@@ -152,4 +153,25 @@ tbody tr:nth-child(even) {
 
 .save-button div {
     font-size: 60px;
+}
+
+.inactive-col {
+    background-color: rgb(179, 176, 176);
+}
+
+.inactive-cell {
+    opacity: 30%;
+}
+
+.toggle-column-button {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    padding: 0;
+    font-size: 18px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+    user-select: none;
 }

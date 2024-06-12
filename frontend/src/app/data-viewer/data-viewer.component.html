@@ -22,7 +22,7 @@
             <tr>
               <th>Row</th>
               <ng-container *ngFor="let column of data.columns; let idx = index">
-                <th>
+                <th [ngClass]="{'inactive-col': isColumnInactive(idx)}">
                   {{ column }}
                   <button *ngIf="featureLabels && featureLabels[idx].featureType != noneType" type="button" class="btn" 
                     [ngClass]="{'btn-danger': featureLabels[idx].isNumeric(), 'btn-info': featureLabels[idx].isCategorical(),
@@ -30,6 +30,10 @@
                     (click)="featureLabels[idx].switchType()">
                     {{featureLabels[idx].caption}}
                   </button>
+                  <div *ngIf="!isColumnInactive(idx)" class="material-symbols-outlined toggle-column-button"
+                    (click)="switchColumnState(idx)">toggle_on</div>
+                  <div *ngIf="isColumnInactive(idx)" class="material-symbols-outlined toggle-column-button"
+                    (click)="switchColumnState(idx)">toggle_off</div>
                 </th>
               </ng-container>
             </tr>
@@ -38,7 +42,7 @@
             <tr *ngFor="let row of data.data; let rowIndex = index">
               <td>{{ rowIndex + 1 }}</td>
               <ng-container *ngFor="let cell of row; let cellIndex = index">
-                <td>{{ cell }}</td>
+                <td [ngClass]="{'inactive-cell': isColumnInactive(cellIndex)}">{{ cell }}</td>
               </ng-container>
             </tr>
           </tbody>
