@@ -50,8 +50,11 @@ export class DataNormalizationComponent {
   numericMethod: string = 'standard';
   errorMessage: string = '';
   isFormExpanded: boolean = true;
+
+  dataTableHeight: string = "450px";
+
   constructor(private dataService: DataService) {
-   }
+  }
 
    getNormalizedData(): void {
     this.dataService.getNormalizedData(this.numericMethod).subscribe(
@@ -68,6 +71,7 @@ export class DataNormalizationComponent {
 
   toggleForm() {
     this.isFormExpanded = !this.isFormExpanded;
+    this.dataTableHeight = this.isFormExpanded ? "450px" : "600px";
   }
   
 

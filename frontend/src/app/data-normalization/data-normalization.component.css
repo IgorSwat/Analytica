@@ -11,7 +11,6 @@
 }
 
 h1 {
- 
     margin-bottom: 20px;
 }
 
@@ -55,12 +54,13 @@ button:hover {
 
 .dataVisualizerTable {
     width: 100%;
-    max-height: 930px;
+    max-height: 450px;
     overflow-x: auto;
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
     background-color: #ffffff;
+    transition: max-height 0.5s ease;
 }
 
 .dataVisualizer {
@@ -68,6 +68,7 @@ button:hover {
   
     padding: 20px;
     border-radius: 8px;
+    overflow-y: hidden;
   
     margin: 0 20px;
 }

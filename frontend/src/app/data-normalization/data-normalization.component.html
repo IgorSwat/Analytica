@@ -18,7 +18,7 @@
   </div>
 </div>
 <div class="dataVisualizer">
-  <div *ngIf="normalizedData" class="dataVisualizerTable" @listAnimation>
+  <div *ngIf="normalizedData" class="dataVisualizerTable" [style.max-height]="dataTableHeight" @listAnimation>
     <table>
       <thead>
         <tr>
