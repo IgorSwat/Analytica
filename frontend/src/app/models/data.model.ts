@@ -16,3 +16,9 @@ export interface PcaInfo {
   loads2: number[],
   selections: boolean[]
 }
+
+export interface ClusterInfo {
+  columns: string[],
+  loads1: number[],
+  loads2: number[],
+}

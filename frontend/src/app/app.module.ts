@@ -11,6 +11,7 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { DataViewerComponent } from './data-viewer/data-viewer.component';
 import { DataNormalizationComponent } from './data-normalization/data-normalization.component';
 import { PcaViewComponent } from './pca-view/pca-view.component';
+import { ClusterViewComponent } from './cluster-view/cluster-view.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
@@ -21,7 +22,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     PageNotFoundComponent,
     DataViewerComponent,
     DataNormalizationComponent,
-    PcaViewComponent
+    PcaViewComponent,
+    ClusterViewComponent
   ],
   imports: [
     BrowserModule,

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DataNormalization, DataVisualization, PcaInfo } from './models/data.model';
+import { DataNormalization, DataVisualization, PcaInfo, ClusterInfo } from './models/data.model';
 import { FeatureLabel } from './models/feature-types';
 
 @Injectable({
@@ -15,6 +15,9 @@ export class DataService {
   private getPcaInfoUrl = 'http://localhost:5000/data/pca/stats';
   private getPcaPlotUrl = 'http://localhost:5000/data/pca/plot';
   private updateFeatureSelectionUrl = 'http://localhost:5000/data/select-features';
+
+  private getClusterInfoUrl = 'http://localhost:5000/data/cluster/compute';
+  private getClusterPlotUrl = 'http://localhost:5000/data/cluster/plot';
 
   // A customizable field, will be replaced by user input in near future
   maxNoRecords: number = 100;
@@ -55,6 +58,15 @@ export class DataService {
   getPcaPlot(plotID: number) : Observable<any> {
     const params = new HttpParams().set('plot_id', plotID.toString());
     return this.http.get<any>(this.getPcaPlotUrl, {params});
+  }
+
+  getClusterInfo() : Observable<ClusterInfo> {
+    return this.http.get<ClusterInfo>(this.getClusterInfoUrl, {});
+  }
+
+  getClusterPlot(plotID: number) : Observable<any> {
+    const params = new HttpParams().set('plot_id', plotID.toString());
+    return this.http.get<any>(this.getClusterPlotUrl, {params});
   }
 
   updateFeatureSelection(featureStates: boolean[]): Observable<any> {

@@ -38,6 +38,7 @@ export class StartViewComponent {
       
       // For tests
       this.appStateService.setNavButtonState('nav-pca', true);
+      this.appStateService.setNavButtonState('nav-stats', true);
     }, error => {
       console.error('Error uploading file', error);
     });
