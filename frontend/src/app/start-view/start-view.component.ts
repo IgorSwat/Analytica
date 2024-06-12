@@ -35,6 +35,10 @@ export class StartViewComponent {
       this.router.navigate(['/data']);
       this.appStateService.setNavButtonState('nav-data', true);
       this.appStateService.setNavButtonState('nav-normalize', true);
+      
+      // For tests
+      this.appStateService.setNavButtonState('nav-pca', true);
+      this.appStateService.setNavButtonState('nav-stats', true);
     }, error => {
       console.error('Error uploading file', error);
     });

@@ -1,0 +1,49 @@
+<div class="content-container">
+    <div *ngIf="pcaInfo" class="pca-content">
+        <div class="table-area">
+            <div style="display: flex; align-items: center;">
+                <h1>Składowe główne</h1>
+                <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                    [title]="infoText1">info</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nazwa cechy</th>
+                            <th>Obciążenie (składowa 1)</th>
+                            <th>Obciążenie (składowa 2)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let feature of pcaInfo.columns; let idx = index">
+                            <td>
+                                {{feature}}
+                                <input type="checkbox" class="form-check-input" [(ngModel)]="featureStates[idx]">
+                            </td>
+                            <td>{{pcaInfo.loads1[idx]}}</td>
+                            <td>{{pcaInfo.loads2[idx]}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button *ngIf="isFeatureSelectionChanged()" (click)="updateFeatureSelection()" type="button" 
+                class="btn btn-primary save-button" title="Zapisz zmiany">
+                <div class="material-symbols-outlined save-button-inner">check</div>
+            </button>
+        </div>
+        <div class="plot-area">
+            <div *ngIf="plotImage" class="plot-container">
+                <img [src]="plotImage" alt="Wykres PCA">
+                <button type="button" class="btn btn-light material-symbols-outlined" (click)="saveImage()">download</button>
+            </div>
+            <div class="plot-changer">
+                <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="prevPlot()">chevron_left</button>
+                <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="nextPlot()">chevron_right</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!pcaInfo" class="loading-label">
+        <p>Loading...</p>
+    </div>
+</div>

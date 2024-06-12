@@ -15,7 +15,8 @@ export class NavbarComponent {
     { name: 'nav-data', label: 'Dane', route: '/data', active: true},
     { name: 'nav-normalize', label: 'Normalizacja', route: '/normalize', active: false},
     { name: 'nav-pca', label: 'PCA', route: '/pca', active: false},
-    { name: 'nav-stats', label: 'Statystyki', route: '/stats', active: false}
+    // { name: 'nav-stats', label: 'Statystyki', route: '/stats', active: false}
+    { name: 'nav-stats', label: 'Statystyki', route: '/cluster', active: false}
   ];
   navButtonsState: { [key: string]: boolean} = {};
 

@@ -1,0 +1,43 @@
+<div class="container">
+  <h1>Normalizacja Danych</h1>
+  <button (click)="toggleForm()">
+    <span *ngIf="isFormExpanded">▲ Ukryj formularz</span>
+    <span *ngIf="!isFormExpanded">▼ Pokaż formularz</span>
+  </button>
+  <form (submit)="getNormalizedData()" [@slideUpDown]="isFormExpanded ? 'expanded' : 'collapsed'">
+    <label for="numericMethod">Metoda Normalizacji</label>
+    <select id="numericMethod" [(ngModel)]="numericMethod" name="numericMethod">
+      <option value="standard">Standard</option>
+      <option value="min-max">Min-Max</option>
+      <option value="robust">Robust</option>
+    </select>
+    <button type="submit">Normalizuj</button>
+  </form>
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+</div>
+<div class="dataVisualizer">
+  <div *ngIf="normalizedData" class="dataVisualizerTable" [style.max-height]="dataTableHeight" @listAnimation>
+    <table>
+      <thead>
+        <tr>
+          <th>Row</th>
+          <ng-container *ngFor="let column of normalizedData.columns; let idx = index">
+            <th>
+              {{ column }}
+            </th>
+          </ng-container>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of normalizedData.data; let rowIndex = index">
+          <td>{{ rowIndex + 1 }}</td>
+          <ng-container *ngFor="let cell of row; let cellIndex = index">
+            <td>{{ cell }}</td>
+          </ng-container>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

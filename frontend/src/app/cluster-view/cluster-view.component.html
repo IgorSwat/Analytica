@@ -1,0 +1,45 @@
+<div class="content-container">
+    <div *ngIf="clusterInfo" class="cluster-content">
+        <div class="table-area">
+            <div style="display: flex; align-items: center;">
+                <h1>Klasteryzacja</h1>
+                <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                    [title]="infoText1">info</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Klaster</th>
+                            <th>Główna składowa 1</th>
+                            <th>Główna składowa 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let feature of clusterInfo.columns; let idx = index">
+                            <td>
+                                {{feature}}
+                                <!-- <input type="checkbox" class="form-check-input" [(ngModel)]="featureStates[idx]"> -->
+                            </td>
+                            <td>{{clusterInfo.loads1[idx]}}</td>
+                            <td>{{clusterInfo.loads2[idx]}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="plot-area">
+            <div *ngIf="plotImage" class="plot-container">
+                <img [src]="plotImage" alt="Wykres Cluster">
+                <button type="button" class="btn btn-light material-symbols-outlined" (click)="saveImage()">download</button>
+            </div>
+            <div class="plot-changer">
+                <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="prevPlot()">chevron_left</button>
+                <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="nextPlot()">chevron_right</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!clusterInfo" class="loading-label">
+        <p>Loading...</p>
+    </div>
+</div>
