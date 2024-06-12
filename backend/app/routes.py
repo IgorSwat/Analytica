@@ -4,12 +4,16 @@ from flask_cors import CORS
 from io import BytesIO
 import csv
 
-from backend.app.data_normalization import DataNormalizer
+# from backend.app.data_normalization import DataNormalizer
+from data_normalization import DataNormalizer
 from flow import DataFlow
 from data_loading import DataProvider
 from types_extraction import FeatureTypeExtractor, FeatureTypeSerializer, FeatureType
+
 from data_selection import DataSelector, FeatureSelector, DataSerializer, parse_ranges
-from pca import PcaAnalyzer, PcaPlotter
+from pca import PcaAnalyzer, PcaPlotter, OnlyPCA
+from data_clustering import ClusterPlotter, DataClusterizer
+
 
 
 app = Flask(__name__)
@@ -48,10 +52,12 @@ def upload_file():
         flow.set_processor("analyze_pca", PcaAnalyzer())
         flow.set_processor("select_features_2", FeatureSelector(input_name="df_normalized"))
 
+        flow.set_processor("return_pca_data", OnlyPCA())
+
         # IMPORTANT
         # Process for the first time to load memory in nodes
         flow.process("extract_f_types")
-
+        
         return {"message": "File processed successfully"}
 
     except Exception as e:
@@ -150,6 +156,7 @@ def normalize_data():
 def get_pca_stats():
     stats = flow.process("analyze_pca")
     df = flow.load_memory("normalize_data")
+
     if df is None or stats is None:
         return jsonify({"error": "Unable to perform PCA on given data"}), 400
 
@@ -205,15 +212,41 @@ def update_feature_selection():
         return jsonify({"error": "Data should be a list of boolean values"}), 400
 
 
-@app.route("/data/clusterize", methods=['GET'])
+@app.route("/data/cluster/compute", methods=['GET'])
 def clusterize_data():
-    ...
+    flow.set_processor("cluster_data", DataClusterizer())
+
+    df_cluster, params = flow.process("cluster_data")
+    # print(params['best_num_clusters'])
+    pca = flow.load_memory("return_pca_data")
+
+    if df_cluster is None or params is None or pca is None:
+        return jsonify({"error": "Unable to perform clustering on given data"}), 400
+
+    def serialize_column(column):
+        return [str(element) for element in column]
+
+    # Extract and convert separate columns
+    cols = [i for i in range(pca.shape[0])]
+    loads1 = serialize_column(pca[:, 0])
+    loads2 = serialize_column(pca[:, 1])
+
+    return jsonify(columns=cols, loads1=loads1, loads2=loads2), 200
 
 
-@app.route("/data/clusterize/cluster_plot", methods=['POST'])
+@app.route("/data/cluster/plot", methods=['GET'])
 def plot_clusters():
-    ...
+    plot_id = request.args.get("plot_id", default=0, type=int)
+    pca = flow.load_memory("return_pca_data")
 
+    flow.set_processor("plot_cluster", ClusterPlotter(pca, plot_id))
+    
+    binary_data = flow.process("plot_cluster")
+    if binary_data is None:
+        return jsonify({"error": f"Unable to generate plot nr {plot_id}"}), 400
+
+    return jsonify({'image': binary_data}), 200
+    
 
 if __name__ == "__main__":
     app.run(debug=True, host="localhost")

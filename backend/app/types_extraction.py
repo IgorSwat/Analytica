@@ -4,7 +4,8 @@ from enum import Enum
 from typing import List
 from math import ceil, log2
 
-from backend.app.processor_base import Processor
+# from backend.app.processor_base import Processor
+from processor_base import Processor
 
 
 class FeatureType(Enum):

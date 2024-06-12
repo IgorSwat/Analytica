@@ -139,3 +139,21 @@ class PcaAnalyzer(PcaTransformer):
             results[i, 1] = loading_factors[i, 1]
 
         return results
+
+# TODO: DO DEBBUGA
+class OnlyPCA(PcaTransformer):
+    def __init__(self, plot_id=0):
+        super().__init__(n_components=2, transform=True)
+
+    def __ne__(self, other):
+        return self.plot_type != other.plot_type
+
+
+    def __call__(self, *args, **kwargs):
+        df = self.extract_arg(kwargs, "df_normalized", pd.DataFrame)
+        principal_components = super().__call__(*args, **kwargs)
+        
+        if df is None or principal_components is None:
+            return None
+        
+        return principal_components

@@ -14,7 +14,13 @@ NORMALIZE_DATA_NODE = ("normalize_data", "df_normalized")
 SERIALIZE_DATA_NODE_2 = ("serialize_data_2", "df_serialized")
 ANALYZE_PCA_NODE = ("analyze_pca", "pca_stats")
 PLOT_PCA_NODE = ("plot_pca", "plot_data")
+
 SELECT_FEATURES_NODE_2 = ("select_features_2", "df_processed")
+
+CLUSTER_DATA_NODE = ("cluster_data", "df_clustered")
+GET_PCA_NODE = ("return_pca_data", "pca_data")
+PLOT_CLUSTER_NODE = ("plot_cluster", "plot_cluster_data")
+
 # ........
 
 
@@ -72,7 +78,12 @@ class DataFlow:
             SERIALIZE_DATA_NODE_2[0]: DataNode(SERIALIZE_DATA_NODE_2),
             ANALYZE_PCA_NODE[0]: DataNode(ANALYZE_PCA_NODE),
             PLOT_PCA_NODE[0]: DataNode(PLOT_PCA_NODE),
-            SELECT_FEATURES_NODE_2[0]: DataNode(SELECT_FEATURES_NODE_2)
+            SELECT_FEATURES_NODE_2[0]: DataNode(SELECT_FEATURES_NODE_2),
+
+            GET_PCA_NODE[0]: DataNode(GET_PCA_NODE),
+            CLUSTER_DATA_NODE[0]: DataNode(CLUSTER_DATA_NODE),
+            PLOT_CLUSTER_NODE[0]: DataNode(PLOT_CLUSTER_NODE),
+
         }
 
         # Define connections (edges in directed, acyclic graph)
@@ -87,6 +98,12 @@ class DataFlow:
         self.__make_connection(NORMALIZE_DATA_NODE[0], PLOT_PCA_NODE[0])
         self.__make_connection(NORMALIZE_DATA_NODE[0], ANALYZE_PCA_NODE[0])
         self.__make_connection(NORMALIZE_DATA_NODE[0], SELECT_FEATURES_NODE_2[0])
+        
+        self.__make_connection(NORMALIZE_DATA_NODE[0], GET_PCA_NODE[0])
+        self.__make_connection(GET_PCA_NODE[0], CLUSTER_DATA_NODE[0])
+        self.__make_connection(NORMALIZE_DATA_NODE[0], CLUSTER_DATA_NODE[0])
+        self.__make_connection(CLUSTER_DATA_NODE[0], PLOT_CLUSTER_NODE[0])
+
 
 
     # This function process all the nodes that lead do node_id in the graph, by performing backpropagation
