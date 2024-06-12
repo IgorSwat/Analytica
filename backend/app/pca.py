@@ -139,38 +139,3 @@ class PcaAnalyzer(PcaTransformer):
             results[i, 1] = loading_factors[i, 1]
 
         return results
-
-
-# PROCESSOR
-# A memory processor that keeps the most recent features selected by user
-class FeatureBank(Processor):
-
-    def __init__(self, feature_selection=None):
-        super().__init__()
-        self.feature_selection = feature_selection
-
-
-    def __ne__(self, other):
-        return self.feature_selection != other.feature_selection
-
-
-    def __call__(self, *args, **kwargs):
-        return self.feature_selection
-
-
-# PROCESSOR
-# Extracts only selected features from given DataFrame
-class FeatureSelector(Processor):
-
-    def __init__(self):
-        super().__init__()
-
-
-    def __call__(self, *args, **kwargs):
-        df = self.extract_arg(kwargs, "df_normalized", pd.DataFrame)
-        feature_selection = self.extract_arg(kwargs, "f_selection", list)
-        if df is None or feature_selection is None:
-            return None
-
-        selected_features_ids = [i for i in range(len(feature_selection)) if feature_selection[i]]
-        return df.drop(df.columns[selected_features_ids], axis=1)

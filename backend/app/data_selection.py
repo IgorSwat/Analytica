@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from processor_base import Processor
 
@@ -7,11 +7,12 @@ from processor_base import Processor
 # Provides pieces of data specified by given ranges
 class DataSelector(Processor):
 
-    def __init__(self, ranges: List[Tuple[int, int]]):
+    def __init__(self, ranges: List[Tuple[int, int]] = None):
         super().__init__()
         self.ranges = ranges
 
-        self.__merge_ranges()
+        if self.ranges is not None:
+            self.__merge_ranges()
 
 
     def __ne__(self, other):
@@ -22,6 +23,9 @@ class DataSelector(Processor):
         df = self.extract_arg(kwargs, "df", pd.DataFrame)
         if df is None:
             return None
+
+        if self.ranges is None:
+            return df
 
         row_amt = df.shape[0]
         result = pd.DataFrame()
@@ -54,6 +58,28 @@ class DataSelector(Processor):
             results.append((min_bound, max_bound))
 
         return results
+
+
+# PROCESSOR
+# Extracts only selected features from given DataFrame
+class FeatureSelector(Processor):
+
+    def __init__(self, feature_states: Dict[str, bool] = None, input_name = "df"):
+        super().__init__()
+        self.feature_states = feature_states
+        self.input_name = input_name
+
+
+    def __call__(self, *args, **kwargs):
+        df = self.extract_arg(kwargs, self.input_name, pd.DataFrame)
+        if df is None:
+            return None
+
+        if self.feature_states is None:
+            return df
+
+        features_to_drop = [col for col in df.columns if not self.feature_states[col]]
+        return df.drop(columns=features_to_drop, inplace=False)
 
 
 # PROCESSOR

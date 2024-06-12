@@ -8,8 +8,8 @@ from backend.app.data_normalization import DataNormalizer
 from flow import DataFlow
 from data_loading import DataProvider
 from types_extraction import FeatureTypeExtractor, FeatureTypeSerializer, FeatureType
-from data_selection import DataSelector, DataSerializer, parse_ranges
-from pca import PcaAnalyzer, PcaPlotter, FeatureBank, FeatureSelector
+from data_selection import DataSelector, FeatureSelector, DataSerializer, parse_ranges
+from pca import PcaAnalyzer, PcaPlotter
 
 
 app = Flask(__name__)
@@ -40,10 +40,13 @@ def upload_file():
         flow.set_processor("extract_f_types", FeatureTypeExtractor())
 
         # We can apply some of the other processors that do not require any specific parameters
+        flow.set_processor("select_data", DataSelector())
+        flow.set_processor("select_features_1", FeatureSelector())
         flow.set_processor("serialize_f_types", FeatureTypeSerializer())
         flow.set_processor("serialize_data_1", DataSerializer(input_name="df"))
         flow.set_processor("serialize_data_2", DataSerializer(input_name="df_normalized"))  # Remember to set a correct name!
         flow.set_processor("analyze_pca", PcaAnalyzer())
+        flow.set_processor("select_features_2", FeatureSelector(input_name="df_normalized"))
 
         # IMPORTANT
         # Process for the first time to load memory in nodes
@@ -76,20 +79,33 @@ def visualize_data():
     # Process in data serialization direction
     serialized_data = flow.process("serialize_data_1")
 
-    return jsonify(length=row_amt,columns=cols, types=serialized_feature_types, data=serialized_data, error=False),200
+    # Get feature selection
+    states = flow.get_processor("select_features_1").feature_states
+    selection = [True for i in range(len(cols))] if states is None else [states[col] for col in cols]
+
+    return jsonify(length=row_amt,columns=cols, types=serialized_feature_types, states=selection, data=serialized_data, error=False),200
 
 
 # It's possible to extend this functionality to edit the column names, but as we know, this is an optional feature :)
 @app.route("/data/update", methods=['PUT'])
 def update_data():
-    # Update feature types
-    new_types = request.get_json()
-    if not new_types:
+    data = request.get_json()
+    new_types = data.get("types")
+    new_selection = data.get("states")
+
+    if not new_types or not new_selection:
         return jsonify({"error": "Invalid input"}), 400
-    elif isinstance(new_types, list) and all(isinstance(item, int) for item in new_types):
+    elif isinstance(new_types, list) and isinstance(new_selection, list):
+        df = flow.process("raw_data")
+
         # Load to "extract_f_types" node's memory
         feature_types = [FeatureType(t) for t in new_types]
         flow.save_memory("extract_f_types", feature_types)
+
+        # Load new data selection
+        selection = {col: new_selection[i] for i, col in enumerate(df.columns)}
+        flow.set_processor("select_features_1", FeatureSelector(selection))
+
         return jsonify({"received": new_types}), 200
     else:
         return jsonify({"error": "Data should be a list of integers"}), 400
@@ -98,7 +114,7 @@ def update_data():
 # Return a CSV object
 @app.route("/data/download", methods=['GET'])
 def download_data():
-    df = flow.process("select_data")
+    df = flow.process("select_features_1")
     if df is None:
         return jsonify({"error": "No data"}), 400
 
@@ -151,11 +167,13 @@ def get_pca_stats():
         indexed_variances = sorted(list(enumerate(stats[:, 0])), key=lambda x: abs(x[1]), reverse=True)
         two_main_components_ids = [item[0] for item in indexed_variances[:2]]
         # Create new selection list and new processor
-        auto_selection = [bool(i in two_main_components_ids) for i in range(len(stats[:, 0]))]
-        flow.set_processor("feature_bank", FeatureBank(auto_selection))
-    f_selection = flow.process("feature_bank")
+        auto_selection = {cols[i]: bool(i in two_main_components_ids) for i in range(len(stats[:, 0]))}
+        flow.set_processor("select_features_2", FeatureSelector(auto_selection, input_name="df_normalized"))
 
-    return jsonify(columns=cols, loads1=loads1, loads2=loads2, selections=f_selection), 200
+    states = flow.get_processor("select_features_2").feature_states
+    selection = [states[col] for col in cols]
+
+    return jsonify(columns=cols, loads1=loads1, loads2=loads2, selections=selection), 200
 
 
 @app.route("/data/pca/plot", methods=['GET'])
@@ -174,13 +192,15 @@ def get_pca_plot():
 
 @app.route("/data/select-features", methods=['PUT'])
 def update_feature_selection():
-    selections = request.get_json()
+    new_selections = request.get_json()
 
-    if not selections:
+    if not new_selections:
         return jsonify({"error": "Invalid input"}), 400
-    elif isinstance(selections, list) and all(isinstance(item, bool) for item in selections):
-        flow.set_processor("feature_bank", FeatureBank(selections))
-        return jsonify({"received": selections}), 200
+    elif isinstance(new_selections, list) and all(isinstance(item, bool) for item in new_selections):
+        df = flow.process("normalize_data")
+        selection = {col: new_selections[i] for i, col in enumerate(df.columns)}
+        flow.set_processor("select_features_2", FeatureSelector(selection, input_name="df_normalized"))
+        return jsonify({"received": new_selections}), 200
     else:
         return jsonify({"error": "Data should be a list of boolean values"}), 400
 

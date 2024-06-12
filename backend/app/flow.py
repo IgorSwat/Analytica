@@ -6,6 +6,7 @@ from collections import deque
 # Second value is important, because it is used inside processors to extract input arguments
 RAW_DATA_NODE = ("raw_data", "df")
 SELECT_DATA_NODE = ("select_data", "df")
+SELECT_FEATURES_NODE_1 = ("select_features_1", "df")
 EXTRACT_TYPES_NODE = ("extract_f_types", "f_types")
 SERIALIZE_DATA_NODE_1 = ("serialize_data_1", "df_serialized")
 SERIALIZE_TYPES_NODE = ("serialize_f_types", "types_serialized")
@@ -13,8 +14,7 @@ NORMALIZE_DATA_NODE = ("normalize_data", "df_normalized")
 SERIALIZE_DATA_NODE_2 = ("serialize_data_2", "df_serialized")
 ANALYZE_PCA_NODE = ("analyze_pca", "pca_stats")
 PLOT_PCA_NODE = ("plot_pca", "plot_data")
-FEATURE_BANK_NODE = ("feature_bank", "f_selection")
-SELECT_FEATURES_NODE = ("select_features", "df_processed")
+SELECT_FEATURES_NODE_2 = ("select_features_2", "df_processed")
 # ........
 
 
@@ -64,6 +64,7 @@ class DataFlow:
         self.nodes : Dict[str, DataNode] = {
             RAW_DATA_NODE[0]: DataNode(RAW_DATA_NODE),
             SELECT_DATA_NODE[0]: DataNode(SELECT_DATA_NODE),
+            SELECT_FEATURES_NODE_1[0]: DataNode(SELECT_FEATURES_NODE_1),
             EXTRACT_TYPES_NODE[0]: DataNode(EXTRACT_TYPES_NODE),
             SERIALIZE_DATA_NODE_1[0]: DataNode(SERIALIZE_DATA_NODE_1),
             SERIALIZE_TYPES_NODE[0]: DataNode(SERIALIZE_TYPES_NODE),
@@ -71,8 +72,7 @@ class DataFlow:
             SERIALIZE_DATA_NODE_2[0]: DataNode(SERIALIZE_DATA_NODE_2),
             ANALYZE_PCA_NODE[0]: DataNode(ANALYZE_PCA_NODE),
             PLOT_PCA_NODE[0]: DataNode(PLOT_PCA_NODE),
-            FEATURE_BANK_NODE[0]: DataNode(FEATURE_BANK_NODE),
-            SELECT_FEATURES_NODE[0]: DataNode(SELECT_FEATURES_NODE)
+            SELECT_FEATURES_NODE_2[0]: DataNode(SELECT_FEATURES_NODE_2)
         }
 
         # Define connections (edges in directed, acyclic graph)
@@ -80,13 +80,13 @@ class DataFlow:
         self.__make_connection(RAW_DATA_NODE[0], EXTRACT_TYPES_NODE[0])
         self.__make_connection(SELECT_DATA_NODE[0], SERIALIZE_DATA_NODE_1[0])
         self.__make_connection(EXTRACT_TYPES_NODE[0], SERIALIZE_TYPES_NODE[0])
-        self.__make_connection(SELECT_DATA_NODE[0], NORMALIZE_DATA_NODE[0])
+        self.__make_connection(SELECT_DATA_NODE[0], SELECT_FEATURES_NODE_1[0])
+        self.__make_connection(SELECT_FEATURES_NODE_1[0], NORMALIZE_DATA_NODE[0])
         self.__make_connection(EXTRACT_TYPES_NODE[0], NORMALIZE_DATA_NODE[0])
         self.__make_connection(NORMALIZE_DATA_NODE[0], SERIALIZE_DATA_NODE_2[0])
         self.__make_connection(NORMALIZE_DATA_NODE[0], PLOT_PCA_NODE[0])
         self.__make_connection(NORMALIZE_DATA_NODE[0], ANALYZE_PCA_NODE[0])
-        self.__make_connection(NORMALIZE_DATA_NODE[0], SELECT_FEATURES_NODE[0])
-        self.__make_connection(FEATURE_BANK_NODE[0], SELECT_FEATURES_NODE[0])
+        self.__make_connection(NORMALIZE_DATA_NODE[0], SELECT_FEATURES_NODE_2[0])
 
 
     # This function process all the nodes that lead do node_id in the graph, by performing backpropagation
@@ -143,6 +143,10 @@ class DataFlow:
         if node_id in self.nodes:
             self.nodes[node_id].last_result = new_value
             self.__reset_related_nodes(node_id, root_exc=True)
+
+
+    def get_processor(self, node_id):
+        return self.nodes[node_id].processor if node_id in self.nodes else None
 
 
     def __make_connection(self, predecessor_id: str, successor_id: str) -> None:
