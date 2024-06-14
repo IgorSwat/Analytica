@@ -1,49 +1,98 @@
 <div class="content-container">
-    <div *ngIf="pcaInfo" class="pca-content">
+
+    <div *ngIf="pcaData" class="pca-content">
+
         <div class="table-area">
-            <div style="display: flex; align-items: center;">
-                <h1>Składowe główne</h1>
-                <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
-                    [title]="infoText1">info</button>
+
+            <div class="view-header">
+                <div class="title-field">
+                    <h1>Składowe główne</h1>
+                    <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                        [title]="infoText1">info</button>
+                </div>
+                <div class="input-field">
+                    <label for="noComponents">Liczba składowych:</label>
+                    <input id="noComponents" type="number" [(ngModel)]="noComponents" class="form-control"
+                      [ngClass]="{'input-error': inputErrorFlag}">
+                </div>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead>
+            
+            <div class="enriched-table-container">
+                <h3>Składowe</h3>
+                <div class="table-container">
+                    <table>
+                      <thead>
                         <tr>
-                            <th>Nazwa cechy</th>
-                            <th>Obciążenie (składowa 1)</th>
-                            <th>Obciążenie (składowa 2)</th>
+                          <th>Składowa</th>
+                          <ng-container *ngFor="let column of pcaData.columns">
+                            <th>{{ column }}</th>
+                          </ng-container>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let feature of pcaInfo.columns; let idx = index">
-                            <td>
-                                {{feature}}
-                                <input type="checkbox" class="form-check-input" [(ngModel)]="featureStates[idx]">
-                            </td>
-                            <td>{{pcaInfo.loads1[idx]}}</td>
-                            <td>{{pcaInfo.loads2[idx]}}</td>
+                      </thead>
+                      <tbody>
+                        <tr>
+                            <td>Wariancja</td>
+                            <ng-container *ngFor="let cell of pcaData.variances">
+                                <td>{{ cell }}</td>
+                            </ng-container>
                         </tr>
-                    </tbody>
-                </table>
+                      </tbody>
+                    </table>
+                </div>
             </div>
-            <button *ngIf="isFeatureSelectionChanged()" (click)="updateFeatureSelection()" type="button" 
-                class="btn btn-primary save-button" title="Zapisz zmiany">
-                <div class="material-symbols-outlined save-button-inner">check</div>
-            </button>
+
+            <div class="enriched-table-container">
+                <h3>Dane po transformacji</h3>
+                <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Row</th>
+                          <ng-container *ngFor="let column of pcaData.columns">
+                            <th>{{ column }}</th>
+                          </ng-container>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let row of pcaData.data; let rowIndex = index">
+                            <td>{{ rowIndex + 1 }}</td>
+                            <ng-container *ngFor="let cell of row">
+                                <td>{{ cell }}</td>
+                            </ng-container>
+                        </tr>
+                      </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
-        <div class="plot-area">
-            <div *ngIf="plotImage" class="plot-container">
+
+        <div *ngIf="plotImage" class="plot-area">
+            <div class="plot-container">
                 <img [src]="plotImage" alt="Wykres PCA">
                 <button type="button" class="btn btn-light material-symbols-outlined" (click)="saveImage()">download</button>
             </div>
             <div class="plot-changer">
-                <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="prevPlot()">chevron_left</button>
-                <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="nextPlot()">chevron_right</button>
+                <button type="button" class="btn btn-light material-symbols-outlined" (click)="prevPlot()">chevron_left</button>
+                <button type="button" class="btn btn-light material-symbols-outlined" (click)="nextPlot()">chevron_right</button>
             </div>
         </div>
+
+        <div *ngIf="!plotImage" class="plot-loading-label">
+            <h3>Ładowanie wykresu...</h3>
+        </div>
+
     </div>
-    <div *ngIf="!pcaInfo" class="loading-label">
-        <p>Loading...</p>
+
+    <div *ngIf="!pcaData" class="error-label">
+        <h3>Ładowanie...</h3>
     </div>
+
+    <div class="action-field">
+        <button *ngIf="hasNoComponentsChanged()" (click)="refreshData()" type="button" 
+          class="btn btn-primary action-button action-button-highlight" title="Odśwież dane">
+          <div class="material-symbols-outlined action-button-inner">refresh</div>
+        </button>
+    </div>
+
 </div>

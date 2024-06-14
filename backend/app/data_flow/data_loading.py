@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 
-from processor_base import Processor
+from app.data_flow.processor_base import Processor
 
 
 # PROCESSOR
@@ -45,4 +45,4 @@ class DataProvider(Processor):
             if has_bad_floats:
                 self.df[column] = self.df[column].apply(map_bad_floats)
 
-        self.df = self.df.applymap(map_bad_floats)
+        self.df = self.df.map(map_bad_floats)

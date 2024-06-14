@@ -1,24 +1,3 @@
-.dataVisualizerTable {
-    width: 100%;
-    max-height: 730px;
-    overflow-x: auto;
-    overflow-y: auto;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    background-color: #ffffff;
-}
-
-.data-header {
-    width: 100%;
-    height: 60px;
-    margin-bottom: 0px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    background-color: white;
-}
-
 .title-field {
     display: flex;
     flex-direction: row;
@@ -32,7 +11,7 @@
 }
 
 .input-field {
-    padding-right: 15px;
+    padding-right: 5px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -50,11 +29,6 @@
     
 }
 
-.inner-input-invalid {
-    border: 2px solid red;
-    outline: none;
-}
-
 /* Specialized style */
 .info-button {
     position: absolute;
@@ -62,53 +36,10 @@
     right: 25px; 
     transform: translateY(-50%);
     font-size: 18px;
-    outline: none;
-    color: gray;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-.info-button:hover {
-    color: rgb(139, 189, 202);
 }
 
-.refresh-button {
-    width: 40px;
-    height: 40px;
-    font-size: 15px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    outline: none;
-    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
-}
-
-table {
-    width: 100%;
-    min-width: 100%;
-    border-collapse: collapse;
-    margin: 0 0 10px 0;
-}
-
-thead {
-    position: sticky;
-    top: 0px;
-    z-index: 1;
-}
-
-th, td {
-    border: 1px solid #e3e6f0;
-    padding: 12px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-th {
-    position: relative;
-    background-color: #0056b3;
-    color: white;
-    font-size: 16px;
+.table-container {
+    max-height: 730px;
 }
 
 th button {
@@ -122,47 +53,6 @@ th button {
     box-shadow: 0px 0px 16px rgb(255, 217, 0);
 }
 
-tbody tr:nth-child(odd) {
-    background-color: #f4f4f4;
-}
-
-tbody tr:nth-child(even) {
-    background-color: #ffffff;
-}
-
-.state-button-field {
-    position: absolute;
-    right: 30px;
-    bottom: 20px;
-    display: flex;
-    flex-direction: row;
-}
-
-.save-button {
-    margin-left: 20px;
-    padding: 5px 5px 0 5px;
-    border-width: 4px;
-    border-style: groove;
-    border-color: #003670;
-    box-shadow: 0 0 40px rgba(0, 238, 255, 0.7);
-}
-
-.save-button:first-child {
-    box-shadow: none;
-}
-
-.save-button div {
-    font-size: 60px;
-}
-
-.inactive-col {
-    background-color: rgb(179, 176, 176);
-}
-
-.inactive-cell {
-    opacity: 30%;
-}
-
 .toggle-column-button {
     position: absolute;
     top: 2px;
@@ -174,4 +64,8 @@ tbody tr:nth-child(even) {
     border: none;
     cursor: pointer;
     user-select: none;
+}
+
+.error-label {
+    padding: 340px 0;
 }

@@ -9,18 +9,11 @@
     user-select: none;
 }
 
-/* Global info-button style, you can create specialized info-button styles in component's stylesheets */
-.info-button {
-    position: absolute;
-    z-index: 1;
-    background: none;
-    border: none;
-    outline: none;
-    border-radius: 50%;
-}
 
+/* ------------------
+   Content box styles
+   ------------------ */
 
-/* Global conent box style with shadows and padding, used as main container in views like DataView or PcaView */
 .content-container {
     flex-grow: 1;
     background-color: #ffffff;
@@ -28,4 +21,138 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     margin: 0 20px;
+}
+
+
+/* --------------------------
+   Repeatable layout elements
+   -------------------------- */
+
+/* A header-panel style  (title, inputs) used for example in DataView or DataNormalizationView */
+.view-header {
+    width: 100%;
+    height: 60px;
+    margin-bottom: 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+}
+
+/* An error box style for centered label covering the whole view, shown when error occurs 
+   [NOTE] Remember to specify the padding to cover vertically */
+.error-label {
+    width: 100%;
+    text-align: center;
+}
+
+.input-error {
+    border: 2px solid red;
+    outline: none;
+}
+
+
+/* -----------------
+   Data table styles
+   ----------------- */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    background-color: #ffffff;
+}
+
+table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 10px 0;
+}
+
+thead {
+    position: sticky;
+    top: 0px;
+    z-index: 1;
+}
+
+th, td {
+    border: 1px solid #e3e6f0;
+    padding: 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    position: relative;
+    background-color: #0056b3;
+    color: white;
+    font-size: 16px;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #f4f4f4;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.inactive-col {
+    background-color: rgb(179, 176, 176);
+}
+
+.inactive-cell {
+    opacity: 30%;
+}
+
+
+/* -------------------
+   Info tooltip styles
+   ------------------- */
+
+.info-button {
+    background: none;
+    border: none;
+    outline: none;
+    border-radius: 50%;
+    color: gray;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.info-button:hover {
+    color: rgb(139, 189, 202);
+}
+
+
+/* -------------------
+   Action panel styles
+   ------------------- */
+
+.action-field {
+    position: absolute;
+    right: 30px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: row;
+}
+
+.action-button {
+    margin-left: 20px;
+    padding: 5px 5px 0 5px;
+    border-width: 4px;
+    border-style: groove;
+    border-color: #003670;
+}
+
+.action-button-inner {
+    font-size: 60px;
+}
+
+.action-button-highlight {
+    box-shadow: 0 0 40px rgba(0, 238, 255, 0.7);
 }

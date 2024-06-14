@@ -1,19 +1,18 @@
+import csv
 import pandas as pd
+
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from io import BytesIO
-import csv
 
-
-# from backend.app.data_normalization import DataNormalizer
-from data_normalization import DataNormalizer
-from flow import DataFlow
-from data_loading import DataProvider
-from types_extraction import FeatureTypeExtractor, FeatureTypeSerializer, FeatureType
-
-from data_selection import DataSelector, FeatureSelector, DataSerializer, parse_ranges
-from pca import PcaAnalyzer, PcaPlotter, OnlyPCA
-from data_clustering import ClusterPlotter, DataClusterizer
+from conversions import df_to_json, f_properties_to_list, f_properties_from_list
+from state_control import StateHandler
+from app.data_flow.data_normalization import DataNormalizer
+from app.data_flow.flow import DataFlow
+from app.data_flow.data_loading import DataProvider
+from app.data_flow.types_extraction import FeatureTypeExtractor, FeatureType
+from app.data_flow.data_selection import DataSelector, FeatureSelector
+from app.data_flow.pca import PcaTransformer, PcaPlotter
 
 
 app = Flask(__name__)
@@ -25,6 +24,15 @@ app.secret_key = "TEST"
 
 # This contains all data and implementation of all data processing methods
 flow = DataFlow()
+
+# Control the current state of app
+state_handler = StateHandler(flow)
+
+
+@app.route("/navbar", methods=["GET"])
+def get_navbar_state():
+    states = state_handler.get_navbar_state()
+    return jsonify(states), 200
 
 
 @app.route('/upload', methods=["POST"])
@@ -40,22 +48,15 @@ def upload_file():
         dialect = csv.Sniffer().sniff(content.decode('utf-8'))
         df = pd.read_csv(file, delimiter=dialect.delimiter)
 
+        # Basic nodes required to init data flow
         flow.set_processor("raw_data", DataProvider(df))    # You can switch off the comma fixes by using fix_commas=False
         flow.set_processor("extract_f_types", FeatureTypeExtractor())
 
-        # We can apply some of the other processors that do not require any specific parameters
+        # We can apply some of the other processors with default parameters
         flow.set_processor("select_data", DataSelector())
         flow.set_processor("select_features_1", FeatureSelector())
-        flow.set_processor("serialize_f_types", FeatureTypeSerializer())
-        flow.set_processor("serialize_data_1", DataSerializer(input_name="df"))
-        flow.set_processor("serialize_data_2", DataSerializer(input_name="df_normalized"))  # Remember to set a correct name!
-        flow.set_processor("analyze_pca", PcaAnalyzer())
-        flow.set_processor("select_features_2", FeatureSelector(input_name="df_normalized"))
-        flow.set_processor("return_pca_data", OnlyPCA())
-
-        # IMPORTANT
-        # Process for the first time to load memory in nodes
-        flow.process("extract_f_types")
+        flow.set_processor("normalize_data", DataNormalizer())
+        flow.set_processor("transform_pca", PcaTransformer())
         
         return {"message": "File processed successfully"}
 
@@ -70,25 +71,29 @@ def visualize_data():
     row_amt = df.shape[0]
     cols = df.columns.values.tolist()
 
-    # Process in feature types serialization direction
-    serialized_feature_types = flow.process("serialize_f_types")
+    # Process in feature types  direction
+    f_types = flow.process("extract_f_types")
+    f_types_converted = f_properties_to_list(f_types, df, lambda x: x.value)
 
-    selection = request.args.get('selection', default=row_amt, type=str)
-    ranges = parse_ranges(selection, row_amt)   # Parse user command
-    if ranges is None:                          # If user command is incorrect, return no data
-        return jsonify(length=row_amt, columns=cols, types=serialized_feature_types, data=[], error=True),200
+    selection_cmd = request.args.get('selection', default=row_amt, type=str)
+    selection_cmd = state_handler.correct_input(selection_cmd, "selection", "select_data")
+    if selection_cmd is not None:
+        flow.set_processor("select_data", DataSelector(selection_cmd))
 
-    # Apply new processor based on parsed ranges
-    flow.set_processor("select_data", DataSelector(ranges))
-
-    # Process in data serialization direction
-    serialized_data = flow.process("serialize_data_1")
+    # Process in data selection direction
+    data = flow.process("select_data")
+    if data is None:    # If user command is incorrect, return no data
+        states = [True for i in range(len(cols))]
+        return jsonify(length=row_amt, columns=cols, types=f_types_converted, states=states, data=[], error=True), 200
+    serialized_data = df_to_json(data)
 
     # Get feature selection
     states = flow.get_processor("select_features_1").feature_states
-    selection = [True for i in range(len(cols))] if states is None else [states[col] for col in cols]
+    selection = [True for i in range(len(cols))] if states is None else f_properties_to_list(states, df)
+    selection_cmd = flow.get_processor("select_data").selection_cmd
 
-    return jsonify(length=row_amt,columns=cols, types=serialized_feature_types, states=selection, data=serialized_data, error=False),200
+    return jsonify(length=row_amt,columns=cols, types=f_types_converted, states=selection,
+                   data=serialized_data, selection=selection_cmd, error=False),200
 
 
 # It's possible to extend this functionality to edit the column names, but as we know, this is an optional feature :)
@@ -104,11 +109,11 @@ def update_data():
         df = flow.process("raw_data")
 
         # Load to "extract_f_types" node's memory
-        feature_types = [FeatureType(t) for t in new_types]
-        flow.save_memory("extract_f_types", feature_types)
+        feature_types = f_properties_from_list(new_types, df, lambda x: FeatureType(x))
+        flow.set_processor("extract_f_types", FeatureTypeExtractor(feature_types))
 
         # Load new data selection
-        selection = {col: new_selection[i] for i, col in enumerate(df.columns)}
+        selection = f_properties_from_list(new_selection, df)
         flow.set_processor("select_features_1", FeatureSelector(selection))
 
         return jsonify({"received": new_types}), 200
@@ -137,110 +142,57 @@ def download_data():
 def normalize_data():
     # Get normalization type
     numeric_method = request.args.get('numeric_method', default='standard', type=str)
+    numeric_method = state_handler.correct_input(numeric_method, "numeric_method", "normalize_data")
+    if numeric_method is not None:
+        flow.set_processor("normalize_data", DataNormalizer(numeric_method))
 
-    # Replace the processor if needed
-    flow.set_processor("normalize_data", DataNormalizer(numeric_method))
     results = flow.process("normalize_data")
     if results is None:
-        return jsonify({"error": "Unable to normalize given data"}), 400
+        return jsonify({"error": "Unable to normalize given data"}), 200
 
     row_amt = results.shape[0]
     cols = results.columns.values.tolist()
-    results_serialized = flow.process("serialize_data_2")
+    results_serialized = df_to_json(results)
+    numeric_method = flow.get_processor("normalize_data").numeric_method
 
-    return jsonify(length=row_amt, columns=cols, data=results_serialized), 200
+    return jsonify(length=row_amt, columns=cols, data=results_serialized, numericMethod=numeric_method), 200
 
 
-@app.route("/data/pca/stats", methods=['GET'])
-def get_pca_stats():
-    stats = flow.process("analyze_pca")
-    df = flow.load_memory("normalize_data")
+@app.route("/data/pca", methods=['GET'])
+def get_pca_data():
+    # Extract and apply n_components parameter
+    n_components = request.args.get('n_components', default=2, type=int)
+    n_components = state_handler.correct_input(n_components, "n_components", "transform_pca")
+    if n_components is not None:
+        # Check for invalid input
+        df = flow.process("normalize_data")
+        if n_components < 1 or n_components > len(df.columns.tolist()):
+            return jsonify(row_amt=0, columns=[], data=[], variances=[], noComponents=n_components, error=True), 200
+        flow.set_processor("transform_pca", PcaTransformer(n_components=n_components))
 
-    if df is None or stats is None:
-        return jsonify({"error": "Unable to perform PCA on given data"}), 400
+    # Perform PCA
+    pca, df = flow.process("transform_pca")
+    if pca is None or df is None:
+        return jsonify({"error": "Unable to perform PCA on given data"}), 200
 
-    def serialize_column(column):
-        return [str(element) for element in column]
-
-    # Extract and convert separate columns
+    # Extract (and convert) response parameters
+    row_amt = df.shape[0]
     cols = df.columns.values.tolist()
-    loads1 = serialize_column(stats[:, 0])
-    loads2 = serialize_column(stats[:, 1])
+    data = df_to_json(df)
+    variances = pca.explained_variance_.tolist()
+    n_components = flow.get_processor("transform_pca").n_components
 
-    # Update feature selections if needed
-    if flow.load_memory("feature_bank") is None:
-        # Select 2 most significant features
-        indexed_variances = sorted(list(enumerate(stats[:, 0])), key=lambda x: abs(x[1]), reverse=True)
-        two_main_components_ids = [item[0] for item in indexed_variances[:2]]
-        # Create new selection list and new processor
-        auto_selection = {cols[i]: bool(i in two_main_components_ids) for i in range(len(stats[:, 0]))}
-        flow.set_processor("select_features_2", FeatureSelector(auto_selection, input_name="df_normalized"))
-
-    states = flow.get_processor("select_features_2").feature_states
-    selection = [states[col] for col in cols]
-
-    return jsonify(columns=cols, loads1=loads1, loads2=loads2, selections=selection), 200
+    return jsonify(row_amt=row_amt, columns=cols, data=data, variances=variances, noComponents=n_components, error=False), 200
 
 
 @app.route("/data/pca/plot", methods=['GET'])
 def get_pca_plot():
     # Obtain plot index
     plot_id = request.args.get("plot_id", default=0, type=int)
+    flow.set_processor("plot_pca", PcaPlotter(plot_id))
 
     # Generate plot data
-    flow.set_processor("plot_pca", PcaPlotter(plot_id))
     binary_data = flow.process("plot_pca")
-    if binary_data is None:
-        return jsonify({"error": f"Unable to generate plot nr {plot_id}"}), 400
-
-    return jsonify({'image': binary_data}), 200
-
-
-@app.route("/data/select-features", methods=['PUT'])
-def update_feature_selection():
-    new_selections = request.get_json()
-
-    if not new_selections:
-        return jsonify({"error": "Invalid input"}), 400
-    elif isinstance(new_selections, list) and all(isinstance(item, bool) for item in new_selections):
-        df = flow.process("normalize_data")
-        selection = {col: new_selections[i] for i, col in enumerate(df.columns)}
-        flow.set_processor("select_features_2", FeatureSelector(selection, input_name="df_normalized"))
-        return jsonify({"received": new_selections}), 200
-    else:
-        return jsonify({"error": "Data should be a list of boolean values"}), 400
-
-
-@app.route("/data/cluster/compute", methods=['GET'])
-def clusterize_data():
-    flow.set_processor("cluster_data", DataClusterizer())
-
-    df_cluster, params = flow.process("cluster_data")
-    # print(params['best_num_clusters'])
-    pca = flow.load_memory("return_pca_data")
-
-    if df_cluster is None or params is None or pca is None:
-        return jsonify({"error": "Unable to perform clustering on given data"}), 400
-
-    def serialize_column(column):
-        return [str(element) for element in column]
-
-    # Extract and convert separate columns
-    cols = [i for i in range(pca.shape[0])]
-    loads1 = serialize_column(pca[:, 0])
-    loads2 = serialize_column(pca[:, 1])
-
-    return jsonify(columns=cols, loads1=loads1, loads2=loads2), 200
-
-
-@app.route("/data/cluster/plot", methods=['GET'])
-def plot_clusters():
-    plot_id = request.args.get("plot_id", default=0, type=int)
-    pca = flow.load_memory("return_pca_data")
-
-    flow.set_processor("plot_cluster", ClusterPlotter(pca, plot_id))
-    
-    binary_data = flow.process("plot_cluster")
     if binary_data is None:
         return jsonify({"error": f"Unable to generate plot nr {plot_id}"}), 400
 

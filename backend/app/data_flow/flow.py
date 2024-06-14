@@ -8,18 +8,12 @@ RAW_DATA_NODE = ("raw_data", "df")
 SELECT_DATA_NODE = ("select_data", "df")
 SELECT_FEATURES_NODE_1 = ("select_features_1", "df")
 EXTRACT_TYPES_NODE = ("extract_f_types", "f_types")
-SERIALIZE_DATA_NODE_1 = ("serialize_data_1", "df_serialized")
-SERIALIZE_TYPES_NODE = ("serialize_f_types", "types_serialized")
 NORMALIZE_DATA_NODE = ("normalize_data", "df_normalized")
-SERIALIZE_DATA_NODE_2 = ("serialize_data_2", "df_serialized")
-ANALYZE_PCA_NODE = ("analyze_pca", "pca_stats")
+TRANSFORM_PCA_NODE = ("transform_pca", "pca_data")
 PLOT_PCA_NODE = ("plot_pca", "plot_data")
-
-SELECT_FEATURES_NODE_2 = ("select_features_2", "df_processed")
-
-CLUSTER_DATA_NODE = ("cluster_data", "df_clustered")
-GET_PCA_NODE = ("return_pca_data", "pca_data")
-PLOT_CLUSTER_NODE = ("plot_cluster", "plot_cluster_data")
+# CLUSTER_DATA_NODE = ("cluster_data", "df_clustered")
+# GET_PCA_NODE = ("return_pca_data", "pca_data")
+# PLOT_CLUSTER_NODE = ("plot_cluster", "plot_cluster_data")
 
 # ........
 
@@ -72,37 +66,27 @@ class DataFlow:
             SELECT_DATA_NODE[0]: DataNode(SELECT_DATA_NODE),
             SELECT_FEATURES_NODE_1[0]: DataNode(SELECT_FEATURES_NODE_1),
             EXTRACT_TYPES_NODE[0]: DataNode(EXTRACT_TYPES_NODE),
-            SERIALIZE_DATA_NODE_1[0]: DataNode(SERIALIZE_DATA_NODE_1),
-            SERIALIZE_TYPES_NODE[0]: DataNode(SERIALIZE_TYPES_NODE),
             NORMALIZE_DATA_NODE[0]: DataNode(NORMALIZE_DATA_NODE),
-            SERIALIZE_DATA_NODE_2[0]: DataNode(SERIALIZE_DATA_NODE_2),
-            ANALYZE_PCA_NODE[0]: DataNode(ANALYZE_PCA_NODE),
+            TRANSFORM_PCA_NODE[0]: DataNode(TRANSFORM_PCA_NODE),
             PLOT_PCA_NODE[0]: DataNode(PLOT_PCA_NODE),
-            SELECT_FEATURES_NODE_2[0]: DataNode(SELECT_FEATURES_NODE_2),
-
-            GET_PCA_NODE[0]: DataNode(GET_PCA_NODE),
-            CLUSTER_DATA_NODE[0]: DataNode(CLUSTER_DATA_NODE),
-            PLOT_CLUSTER_NODE[0]: DataNode(PLOT_CLUSTER_NODE),
+            # GET_PCA_NODE[0]: DataNode(GET_PCA_NODE),
+            # CLUSTER_DATA_NODE[0]: DataNode(CLUSTER_DATA_NODE),
+            # PLOT_CLUSTER_NODE[0]: DataNode(PLOT_CLUSTER_NODE),
 
         }
 
         # Define connections (edges in directed, acyclic graph)
         self.__make_connection(RAW_DATA_NODE[0], SELECT_DATA_NODE[0])
         self.__make_connection(RAW_DATA_NODE[0], EXTRACT_TYPES_NODE[0])
-        self.__make_connection(SELECT_DATA_NODE[0], SERIALIZE_DATA_NODE_1[0])
-        self.__make_connection(EXTRACT_TYPES_NODE[0], SERIALIZE_TYPES_NODE[0])
         self.__make_connection(SELECT_DATA_NODE[0], SELECT_FEATURES_NODE_1[0])
         self.__make_connection(SELECT_FEATURES_NODE_1[0], NORMALIZE_DATA_NODE[0])
         self.__make_connection(EXTRACT_TYPES_NODE[0], NORMALIZE_DATA_NODE[0])
-        self.__make_connection(NORMALIZE_DATA_NODE[0], SERIALIZE_DATA_NODE_2[0])
-        self.__make_connection(NORMALIZE_DATA_NODE[0], PLOT_PCA_NODE[0])
-        self.__make_connection(NORMALIZE_DATA_NODE[0], ANALYZE_PCA_NODE[0])
-        self.__make_connection(NORMALIZE_DATA_NODE[0], SELECT_FEATURES_NODE_2[0])
-        
-        self.__make_connection(NORMALIZE_DATA_NODE[0], GET_PCA_NODE[0])
-        self.__make_connection(GET_PCA_NODE[0], CLUSTER_DATA_NODE[0])
-        self.__make_connection(NORMALIZE_DATA_NODE[0], CLUSTER_DATA_NODE[0])
-        self.__make_connection(CLUSTER_DATA_NODE[0], PLOT_CLUSTER_NODE[0])
+        self.__make_connection(NORMALIZE_DATA_NODE[0], TRANSFORM_PCA_NODE[0])
+        self.__make_connection(TRANSFORM_PCA_NODE[0], PLOT_PCA_NODE[0])
+        # self.__make_connection(NORMALIZE_DATA_NODE[0], GET_PCA_NODE[0])
+        # self.__make_connection(GET_PCA_NODE[0], CLUSTER_DATA_NODE[0])
+        # self.__make_connection(NORMALIZE_DATA_NODE[0], CLUSTER_DATA_NODE[0])
+        # self.__make_connection(CLUSTER_DATA_NODE[0], PLOT_CLUSTER_NODE[0])
 
 
 
@@ -131,7 +115,6 @@ class DataFlow:
             node = self.nodes[node_id]
             node.active = True
 
-            # TODO: Test this optimization for it's correctness
             if node.processor is None or node.processor != processor:
                 node.processor = processor
                 self.__reset_related_nodes(node_id, root_exc=False)

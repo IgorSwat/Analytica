@@ -1,8 +1,9 @@
 import pandas as pd
+
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, OneHotEncoder
 
-from processor_base import Processor
-from types_extraction import FeatureType
+from app.data_flow.processor_base import Processor
+from app.data_flow.types_extraction import FeatureType
 
 
 available_numeric_methods = ["standard", "min-max", "robust"]
@@ -29,21 +30,21 @@ class DataNormalizer(Processor):
 
     def __call__(self, *args, **kwargs):
         df = self.extract_arg(kwargs, "df", pd.DataFrame)
-        f_types = self.extract_arg(kwargs, "f_types", list)
+        f_types = self.extract_arg(kwargs, "f_types", dict)
         if df is None or f_types is None:
             return None
 
         df_copy = df.copy()
-        for i, col in enumerate(df.columns):
-            if f_types[i] == FeatureType.NUMERIC:
+        for col in df:
+            if f_types[col] == FeatureType.NUMERIC:
                 df_copy[col] = self.normalize_numeric(df_copy[[col]])
-            elif f_types[i] == FeatureType.CATEGORICAL:
+            elif f_types[col] == FeatureType.CATEGORICAL:
                 df_copy[col] = self.normalize_categorical(df_copy[[col]])
 
         # Warning - this is optional and may be remover depending on future requirements
         # Remove 'none' type columns (like IDs or timestamps)
-        none_type_features = [i for i in range(len(f_types)) if f_types[i] == FeatureType.NONE]
-        df_copy = df_copy.drop(df_copy.columns[none_type_features], axis=1)
+        none_type_features = [col for col in df if f_types[col] == FeatureType.NONE]
+        df_copy = df_copy.drop(columns=none_type_features)
 
         return df_copy
 

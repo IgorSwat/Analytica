@@ -1,11 +1,11 @@
 import pandas as pd
+
 from datetime import datetime
 from enum import Enum
-from typing import List
 from math import ceil, log2
+from typing import Dict
 
-# from backend.app.processor_base import Processor
-from processor_base import Processor
+from app.data_flow.processor_base import Processor
 
 
 class FeatureType(Enum):
@@ -18,8 +18,14 @@ class FeatureType(Enum):
 # Detects and extracts feature types for given DataFrame
 class FeatureTypeExtractor(Processor):
 
-    def __init__(self):
+    # Allows you to set predefined types (if f_types != None) or to extract types from input data (if f_types == None)
+    def __init__(self, f_types: Dict[str, FeatureType] = None):
         super().__init__()
+        self.f_types = f_types
+
+
+    def __ne__(self, other):
+        return self.f_types != other.f_types
 
 
     def __call__(self, *args, **kwargs):
@@ -27,14 +33,16 @@ class FeatureTypeExtractor(Processor):
         if df is None:
             return None
 
-        feature_types = []
-        for column in df:
-            if self.__detect_id(df, column) or self.__detect_timestamp(df, column):
-                feature_types.append(FeatureType.NONE)
-            else:
-                feature_types.append(self.__get_type(df, column))
-
-        return feature_types
+        if self.f_types is None:
+            feature_types = {}
+            for column in df:
+                if self.__detect_id(df, column) or self.__detect_timestamp(df, column):
+                    feature_types[column] = FeatureType.NONE
+                else:
+                    feature_types[column] = self.__get_type(df, column)
+            return feature_types
+        else:
+            return self.f_types
 
 
     def __detect_id(self, df: pd.DataFrame, column: str) -> bool:
@@ -103,19 +111,3 @@ class FeatureTypeExtractor(Processor):
         else:
             n_unique = df_drop_na.nunique()
             return FeatureType.NUMERIC if n_unique >= unique_threshold else FeatureType.CATEGORICAL
-
-
-# PROCESSOR
-# Serializes list of feature types (enums) into list of pure integers
-class FeatureTypeSerializer(Processor):
-
-    def __init__(self):
-        super().__init__()
-
-
-    def __call__(self, *args, **kwargs):
-        feature_types = self.extract_arg(kwargs, "f_types", list)
-        if feature_types is None:
-            return None
-
-        return [f_type.value for f_type in feature_types]

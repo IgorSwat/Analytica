@@ -21,26 +21,19 @@ export class StartViewComponent {
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       this.uploadFile(file);
-
-      // Just a test code
-      //this.appStateService.setNavButtonState("nav-data", true);
-      //this.appStateService.setNavButtonState("nav-pca", true);
     }
   }
 
   uploadFile(file: File): void {
-    this.fileUploadService.uploadFile(file).subscribe(response => {
-      console.log('File uploaded successfully', response);
-      // Here redirect to /data route and unlock some buttons
-      this.router.navigate(['/data']);
-      this.appStateService.setNavButtonState('nav-data', true);
-      this.appStateService.setNavButtonState('nav-normalize', true);
+    this.fileUploadService.uploadFile(file).subscribe({
+      next: (response) => {
+        console.log('File uploaded successfully', response);
       
-      // For tests
-      this.appStateService.setNavButtonState('nav-pca', true);
-      this.appStateService.setNavButtonState('nav-stats', true);
-    }, error => {
-      console.error('Error uploading file', error);
+        // Here redirect to /data route and unlock some buttons
+        this.appStateService.updateNavbarState();
+        this.router.navigate(['/data']);
+      },
+      error: (err) => console.error('Error uploading file', err)
     });
   }
 }

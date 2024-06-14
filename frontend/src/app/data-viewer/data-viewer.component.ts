@@ -2,9 +2,8 @@ import { Component } from '@angular/core';
 import { DataService } from '../data.service';
 import { DataVisualization } from '../models/data.model';
 import { FeatureType, FeatureLabel } from '../models/feature-types';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { FormControl } from '@angular/forms';
 import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
+
 
 @Component({
   selector: 'app-data-viewer',
@@ -24,44 +23,52 @@ import { trigger, state, style, transition, animate, query, stagger } from '@ang
   ]
 })
 
+
 export class DataViewerComponent {
+  // Main data container
   data: DataVisualization | null = null;
 
+  // Dynamic feature properties
   featureLabels: FeatureLabel[] | null = null;
   featureStates: boolean[] | null = null;
-  noneType = FeatureType.NONE;
 
-  inputValue = new FormControl('');          // Bidirectional binding with row selection input element, stores the current value from input
-  lastInputValue: string = ''; // form control as string 
-  inputErrorFlag: boolean = false;  // If input is incorrect and data not loaded properly, marks input bar as red
+  // Row selection input elements
+  inputValue: string = '';  // Bidirectional binding with row selection input element, stores the current value from input
+  lastInputValue: string = '';
+  inputErrorFlag: boolean = false;   // If input is incorrect and data not loaded properly, marks input bar as red
   
+  // GUI text elements
   infoText: string = "Przykład użycia:\n1-5, 20-40 (Wiersze 1-5 i 20-40)\n1-10, 12 (Wiersze 1-10 oraz 12-ty)\n# (Wszystkie wiersze)\n\n \
                       Domyślnie 100 pierwszych wierszy";
+
+
+  // --------------
+  // Initialization
+  // --------------
 
   constructor(private dataService: DataService) { }
 
   ngOnInit() {
-    this.loadData();
-
-    this.inputValue.valueChanges.pipe(
-      distinctUntilChanged() // Only unique values
-    ).subscribe(value => {
-      if (value !== null) {
-        this.onRefresh(value);
-      }
-    });
-    
+    this.loadData("xxxxx");
   }
 
-  loadData(selection: string = "") : void {
+  // ------------
+  // API handlers
+  // ------------
+
+  loadData(selection: string) : void {
     this.dataService.getData(selection).subscribe({
       next: (data) => {
         this.data = data;
         this.featureLabels = this.data.types.map((value) => {return new FeatureLabel(<FeatureType>value);});
         this.featureStates = [...this.data.states];
+        this.inputValue = data.selection;
+        this.lastInputValue = this.inputValue;
         this.inputErrorFlag = data.error;
       },
-      error: (err) => console.error('Error fetching data:', err),
+      error: (err) => {
+        console.error('Error fetching data:', err)
+      }
     });
   }
 
@@ -94,13 +101,23 @@ export class DataViewerComponent {
     }
   }
 
-  onRefresh(newValue: string) : void {
-    if (newValue !== this.lastInputValue) {
-      this.lastInputValue = newValue;
-      this.loadData(newValue);
-    }
+  refreshData() : void {
+    this.loadData(this.inputValue);
   }
 
+  // --------------
+  // Action methods
+  // --------------
+
+  switchColumnState(colID: number) : void {
+    if (this.featureStates != null)
+      this.featureStates[colID] = !this.featureStates[colID];
+  }
+
+  // -----------------------
+  // Getters and comparators
+  // -----------------------
+  
   isDataChanged() : boolean {
     if (this.data != null && this.featureLabels != null) {
       for (let id = 0; id < this.data.types.length; id++) {
@@ -115,21 +132,24 @@ export class DataViewerComponent {
     return this.data != null && this.data.data.length > 0;
   }
 
+  hasDataRangeChanged() : boolean {
+    return this.inputValue != this.lastInputValue;
+  }
+
   isTypeMismatch(colID : number) : boolean {
-    return this.featureLabels![colID].featureType != <FeatureType>this.data!.types[colID];
+    return this.featureLabels![colID].featureType != <FeatureType>this.data?.types[colID];
   }
 
   isStateMismatch(colID: number) : boolean {
-    return this.featureStates![colID] != this.data!.states[colID];
+    return this.featureStates![colID] != this.data?.states[colID];
   }
   
-  isColumnInactive(colID: number) : boolean {
-    return this.featureStates != null && !this.featureStates[colID];
+  isColumnActive(colID: number) : boolean {
+    return this.featureStates![colID];
   }
 
-  switchColumnState(colID: number) : void {
-    if (this.featureStates != null)
-      this.featureStates[colID] = !this.featureStates[colID];
+  hasFeatureType(colID: number) : boolean {
+    return this.featureLabels![colID].featureType != FeatureType.NONE;
   }
 
 }

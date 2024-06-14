@@ -1,20 +1,24 @@
-export interface DataNormalization {
+interface BasicData {
   length: number;
   columns: string[];
   data: string[][];
-  error: boolean;
 }
 
 export interface DataVisualization extends DataNormalization {
-  types: number[],             // Feature types
-  states: boolean[]            // Feature states
+  types: number[];               // Feature types
+  states: boolean[];             // Feature states
+  selection: string;
+  error: boolean;                // if input range is incorrect
 }
 
-export interface PcaInfo {
-  columns: string[],
-  loads1: number[],
-  loads2: number[],
-  selections: boolean[]
+export interface DataNormalization extends BasicData {
+  numericMethod: string;
+}
+
+export interface PcaData extends BasicData {
+  variances: number[];
+  noComponents: number;
+  error: boolean;
 }
 
 export interface ClusterInfo {

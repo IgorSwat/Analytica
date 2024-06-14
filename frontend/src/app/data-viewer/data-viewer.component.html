@@ -1,63 +1,69 @@
 <div class="content-container">
-    <div class="data-header">
+
+    <div class="view-header">
         <div class="title-field">
             <h1>Wizualizacja danych</h1>
             <h4 *ngIf="data">(Wybrano {{data.data.length}} z {{data.length}} rekordów)</h4>
         </div>
         <div class="input-field">
             <div class="outer-input">
-              <input type="text" [formControl]="inputValue" placeholder="Podaj zakres danych do wyświetlania"
-                class="form-control inner-input" [ngClass]="{'inner-input-invalid': inputErrorFlag}" >
+              <input type="text" [(ngModel)]="inputValue" placeholder="Podaj zakres danych do wyświetlania"
+                class="form-control inner-input" [ngClass]="{'input-error': inputErrorFlag}" >
               <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
                 [title]="infoText">info</button>
             </div>
-            <!-- <button type="button" class="btn btn-primary material-symbols-outlined refresh-button" (click)="onRefresh()">
-              <div class="material-symbols-outlined">refresh</div>
-            </button> -->
           </div>
     </div>
-    <div *ngIf="data" class="dataVisualizerTable" @listAnimation>
-        <table>
-          <thead>
-            <tr>
-              <th>Row</th>
-              <ng-container *ngFor="let column of data.columns; let idx = index">
-                <th [ngClass]="{'inactive-col': isColumnInactive(idx)}">
-                  {{ column }}
-                  <button *ngIf="featureLabels && featureLabels[idx].featureType != noneType" type="button" class="btn" 
-                    [ngClass]="{'btn-danger': featureLabels[idx].isNumeric(), 'btn-info': featureLabels[idx].isCategorical(),
-                                'highlighted-button': isTypeMismatch(idx)}"
-                    (click)="featureLabels[idx].switchType()">
-                    {{featureLabels[idx].caption}}
-                  </button>
-                  <div *ngIf="!isColumnInactive(idx)" class="material-symbols-outlined toggle-column-button"
-                    (click)="switchColumnState(idx)">toggle_on</div>
-                  <div *ngIf="isColumnInactive(idx)" class="material-symbols-outlined toggle-column-button"
-                    (click)="switchColumnState(idx)">toggle_off</div>
-                </th>
-              </ng-container>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of data.data; let rowIndex = index">
+
+    <div *ngIf="data" class="table-container" @listAnimation>
+      <table>
+        <thead>
+          <tr>
+            <th>Row</th>
+            <ng-container *ngFor="let column of data.columns; let idx = index">
+              <th [ngClass]="{'inactive-col': !isColumnActive(idx)}">
+                {{ column }}
+                <button *ngIf="featureLabels && hasFeatureType(idx)" type="button" class="btn" 
+                  [ngClass]="{'btn-danger': featureLabels[idx].isNumeric(), 'btn-info': featureLabels[idx].isCategorical(),
+                              'highlighted-button': isTypeMismatch(idx)}"
+                  (click)="featureLabels[idx].switchType()">
+                  {{featureLabels[idx].caption}}
+                </button>
+                <div *ngIf="isColumnActive(idx)" class="material-symbols-outlined toggle-column-button"
+                  (click)="switchColumnState(idx)">toggle_on</div>
+                <div *ngIf="!isColumnActive(idx)" class="material-symbols-outlined toggle-column-button"
+                  (click)="switchColumnState(idx)">toggle_off</div>
+              </th>
+            </ng-container>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of data.data; let rowIndex = index">
               <td>{{ rowIndex + 1 }}</td>
-              <ng-container *ngFor="let cell of row; let cellIndex = index">
-                <td [ngClass]="{'inactive-cell': isColumnInactive(cellIndex)}">{{ cell }}</td>
-              </ng-container>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    <div class="state-button-field">
-      <button *ngIf="isAnyDataLoaded()" (click)="downloadData()" type="button" class="btn btn-primary save-button" title="Eksportuj dane">
-        <div class="material-symbols-outlined save-button-inner">download</div>
+            <ng-container *ngFor="let cell of row; let cellIndex = index">
+              <td [ngClass]="{'inactive-cell': !isColumnActive(cellIndex)}">{{ cell }}</td>
+            </ng-container>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="action-field">
+      <button *ngIf="isAnyDataLoaded()" (click)="downloadData()" type="button" 
+        class="btn btn-primary action-button" title="Eksportuj dane">
+        <div class="material-symbols-outlined action-button-inner">download</div>
       </button>
-      <button *ngIf="isDataChanged()" (click)="updateData()" type="button" class="btn btn-primary save-button" title="Zapisz zmiany">
-        <div class="material-symbols-outlined save-button-inner">check</div>
+      <button *ngIf="hasDataRangeChanged()" (click)="refreshData()" type="button" 
+        class="btn btn-primary action-button action-button-highlight" title="Odśwież dane">
+        <div class="material-symbols-outlined action-button-inner">refresh</div>
+      </button>
+      <button *ngIf="isDataChanged()" (click)="updateData()" type="button" 
+        class="btn btn-primary action-button action-button-highlight" title="Zapisz zmiany">
+        <div class="material-symbols-outlined action-button-inner">check</div>
       </button>
     </div>
-    <div *ngIf="!data">
-        <p>Loading...</p>
+
+    <div *ngIf="!data" class="error-label">
+        <h3>Loading...</h3>
     </div>
 </div>
 

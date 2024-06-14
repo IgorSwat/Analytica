@@ -1,115 +1,80 @@
 .pca-content {
     width: 100%;
-    height: 760px;
-    margin-top: 20px;
+    height: 100%;
     padding: 0 10px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
 
-.loading-label {
-    width: 100%;
-    padding: 370px 0;
-    text-align: center;
+.error-label {
+    padding: 340px 0;
 }
+
+
+/* -----------------
+   Table area styles 
+   ----------------- */
 
 .table-area {
-    height: auto;
-    position: relative;
-    border-radius: 8px;
-    background-color: #ffffff;
+    width: 1000px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.table-container {
-    max-height: 680px;
-    position: relative;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.title-field {
+    display: flex;
+    flex-direction: row;
 }
 
-.table-area h1 {
-    margin: 0 0 20px 0;
-}
-
-.info-button {
-    position: relative;
-    transform: translateY(-15%);
+.title-field .info-button {
     margin-left: 10px;
-    font-size: 26px;
-    outline: none;
-    color: gray;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-.info-button:hover {
-    color: rgb(139, 189, 202);
 }
 
-table {
-    width: 100%;
-    min-width: 100%;
-    border-collapse: collapse;
-    margin: 0 0 10px 0;
+.input-field {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
-thead {
-    position: sticky;
-    top: 0px;
-    z-index: 1;
+.input-field label {
+    margin: 0 15px 0 0;
+    font-size: 18px;
+    color: #333333;
 }
 
-th, td {
-    min-width: 240px;
-    border: 1px solid #e3e6f0;
-    padding: 12px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-td input {
-    position: relative;
-    margin: 0 0 0 10px;
-}
-
-th:first-child, td:first-child {
-    min-width: 280px;
-}
-
-th {
-    background-color: #0056b3;
-    color: white;
+.input-field input {
+    width: 62px;
+    height: 52px;
     font-size: 16px;
 }
 
-tbody tr:nth-child(odd) {
-    background-color: #f4f4f4;
+.enriched-table-container h3 {
+    width: 100%;
+    text-align: center;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.13);
 }
 
-tbody tr:nth-child(even) {
-    background-color: #ffffff;
+.enriched-table-container:nth-child(2) {
+    height: 150px;
+    margin-top: 20px;
+    margin-bottom: 50px;
 }
 
-.save-button {
-    padding: 5px 5px 0 5px;
-    position: absolute;
-    right: 32px;
-    bottom: 25px;
-    border-width: 4px;
-    border-style: groove;
-    border-color: #003670;
-    box-shadow: 0 0 40px rgba(0, 238, 255, 0.7);
+.enriched-table-container:nth-child(3) {
+    height:500px;
+    margin-bottom: 0;
 }
 
-.save-button div {
-    font-size: 40px;
+.table-container {
+    max-height: 440px;
 }
 
 
-
-/* Plot area styles */
+/* ----------------
+   Plot area styles 
+   ---------------- */
 
 .plot-area {
     max-height: 700px;
@@ -132,21 +97,27 @@ tbody tr:nth-child(even) {
 }
 
 .plot-area img {
-    width: 880px;
+    width: 700px;
     height: 680px;
 }
 
 .plot-changer {
     width: 400px;
-    margin-top: 30px;
+    margin-top: 40px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
 
-.plot-button {
+.plot-changer button {
     font-size: 36px;
     font-weight: bold;
     padding: 0px 8px;
     box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.plot-loading-label {
+    width: 680px;
+    padding: 330px 0;
+    text-align: center;
 }

@@ -10,25 +10,44 @@ import { AppStateService } from '../app-state.service';
 
 
 export class NavbarComponent {
+
   // "name" attribute is a common identifier used for specyfic button (specifically inside AppStateService)
   navButtons = [
-    { name: 'nav-data', label: 'Dane', route: '/data', active: true},
-    { name: 'nav-normalize', label: 'Normalizacja', route: '/normalize', active: false},
-    { name: 'nav-pca', label: 'PCA', route: '/pca', active: false},
-    // { name: 'nav-stats', label: 'Statystyki', route: '/stats', active: false}
-    { name: 'nav-stats', label: 'Statystyki', route: '/cluster', active: false}
+    { name: 'nav-data', label: 'Dane', route: '/data'},
+    { name: 'nav-normalize', label: 'Normalizacja', route: '/normalize'},
+    { name: 'nav-pca', label: 'PCA', route: '/pca'},
+    { name: 'nav-clusters', label: 'Klasteryzacja', route: '/cluster'}
   ];
   navButtonsState: { [key: string]: boolean} = {};
+
+
+  // --------------
+  // Initialization
+  // --------------
 
   constructor(private router: Router, private appStateService : AppStateService) {}
 
   ngOnInit(): void {
+    this.appStateService.updateNavbarState();
     this.appStateService.navButtonsState$.subscribe(state => {this.navButtonsState = state;});
   }
 
+
+  // --------------
+  // Action methods
+  // --------------
+
   navigateTo(route: string): void {
     this.router.navigate([route]);
-    this.navButtons.forEach(button => {button.active = (button.route == route);})
+  }
+
+
+  // -----------------------
+  // Getters and comparators
+  // -----------------------
+
+  isButtonActive(buttonRoute: string) : boolean {
+    return this.router.url == buttonRoute;
   }
 
   isButtonDisabled(buttonName: string) : boolean {

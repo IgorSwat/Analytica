@@ -1,37 +1,56 @@
 import { Component } from '@angular/core';
 import { DataService } from '../data.service';
-import { PcaInfo } from '../models/data.model';
+import { PcaData } from '../models/data.model';
+import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
 
 @Component({
   selector: 'app-pca-view',
   templateUrl: './pca-view.component.html',
   styleUrls: ['./pca-view.component.css']
 })
-export class PcaViewComponent {
-  pcaInfo: PcaInfo | null = null;
 
-  featureStates: boolean[] = new Array(20).fill(true);
+
+export class PcaViewComponent {
+  // Main data container
+  pcaData: PcaData | null = null;
+
+  // Number of components input elements
+  noComponents: number = 0;
+  prevNoComponents: number = 2;
+  inputErrorFlag: boolean = false;
 
   // Plot state
   plotImage: string | null = null;
   currentPlot: number = 0;
   MAX_NO_PLOTS: number = 3;
 
-  // Info text
-  infoText1 = "Wybierz zmienne do grupowania";
+  // GUI text elements
+  infoText1 = "PCA - metoda redukcji wymiarowości poprzez zastępowanie cech tzw. \"składowymi głównymi\"\n\n" +
+              "Wybierz liczbę składowych głównych do dalszej analizy." 
+
+
+  // --------------
+  // Initialization
+  // --------------
 
   constructor(private dataService: DataService) { }
 
   ngOnInit() {
-    this.loadPcaInfo();
-    this.loadPlot();
+    this.refreshData();
   }
 
-  loadPcaInfo() : void {
-    this.dataService.getPcaInfo().subscribe({
-      next: (pcaInfo) => {
-        this.pcaInfo = pcaInfo;
-        this.featureStates = [...this.pcaInfo.selections];
+
+  // ------------
+  // API handlers
+  // ------------
+
+  loadPcaData() : void {
+    this.dataService.getPcaData(this.noComponents).subscribe({
+      next: (data) => {
+        this.pcaData = data;
+        this.noComponents = data.noComponents;
+        this.prevNoComponents = this.noComponents;
+        this.inputErrorFlag = data.error;
       },
       error: (err) => console.error('Error fetching data:', err)
     });
@@ -41,29 +60,15 @@ export class PcaViewComponent {
     this.dataService.getPcaPlot(this.currentPlot).subscribe({
       next: (response) => {
         this.plotImage = "data:image/png;base64," + response.image;
-        console.log("Plot succesfully loaded")
       },
       error: (err) => console.error('Error fetching data:', err)
     });
   }
 
-  updateFeatureSelection() : void {
-    this.dataService.updateFeatureSelection(this.featureStates).subscribe({
-      next: (response) => {
-        console.log(response);
-        this.loadPcaInfo();
-      },
-      error: (err) => console.error('Error fetching data:', err)
-    });
-  }
 
-  isFeatureSelectionChanged() : boolean {
-    for (let i = 0; i < this.featureStates.length; i++) {
-      if (this.featureStates[i] != this.pcaInfo?.selections[i])
-        return true;
-    }
-    return false;
-  }
+  // --------------
+  // Action methods
+  // --------------
 
   prevPlot() : void {
     this.currentPlot = (this.currentPlot - 1) % this.MAX_NO_PLOTS;
@@ -84,6 +89,20 @@ export class PcaViewComponent {
       link.click();
       document.body.removeChild(link);
     }
+  }
+
+  refreshData() : void {
+    this.loadPcaData();
+    this.loadPlot();
+  }
+
+
+  // -----------------------
+  // Getters and comparators
+  // -----------------------
+
+  hasNoComponentsChanged() : boolean {
+    return this.noComponents != this.prevNoComponents;
   }
 
 }

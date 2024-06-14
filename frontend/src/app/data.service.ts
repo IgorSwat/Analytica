@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DataNormalization, DataVisualization, PcaInfo, ClusterInfo } from './models/data.model';
+import { DataNormalization, DataVisualization, PcaData, ClusterInfo } from './models/data.model';
 import { FeatureLabel } from './models/feature-types';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class DataService {
   private updateDataUrl = 'http://localhost:5000/data/update';
   private normalizeDataUrl = 'http://localhost:5000/data/normalize';
   private downloadDataUrl = 'http://localhost:5000/data/download';
-  private getPcaInfoUrl = 'http://localhost:5000/data/pca/stats';
+  private getPcaDataUrl = 'http://localhost:5000/data/pca';
   private getPcaPlotUrl = 'http://localhost:5000/data/pca/plot';
   private updateFeatureSelectionUrl = 'http://localhost:5000/data/select-features';
 
@@ -51,8 +51,9 @@ export class DataService {
     return this.http.get<DataNormalization>(this.normalizeDataUrl, {params});
   }
 
-  getPcaInfo() : Observable<PcaInfo> {
-    return this.http.get<PcaInfo>(this.getPcaInfoUrl, {});
+  getPcaData(noComponents: number) : Observable<PcaData> {
+    const params = new HttpParams().set('n_components', noComponents);
+    return this.http.get<PcaData>(this.getPcaDataUrl, {params});
   }
 
   getPcaPlot(plotID: number) : Observable<any> {

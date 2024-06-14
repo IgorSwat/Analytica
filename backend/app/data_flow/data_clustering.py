@@ -1,27 +1,24 @@
+import io
+import base64
 import pandas as pd
 import numpy as np
-from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering, OPTICS
-from sklearn.metrics import silhouette_score as shs
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.decomposition import PCA
-from sklearn.neighbors import NearestNeighbors
 import itertools
 import seaborn as sns
 import matplotlib.pyplot as plt
+import warnings
+
+from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from sklearn.metrics import silhouette_score as shs
+from sklearn.preprocessing import StandardScaler
 from matplotlib.pyplot import cm
-import io
-import base64
+
+from app.data_flow.processor_base import Processor
 
 
 def warn(*args, **kwargs):
     pass
 
-
-import warnings
-
 warnings.warn = warn
-
-from processor_base import Processor
 
 
 available_cluster_methods = ["k-means", "dbscan", "hierarchy"]
@@ -29,7 +26,7 @@ available_cluster_methods = ["k-means", "dbscan", "hierarchy"]
 
 class DataClusterizer(Processor):
 
-    def __init__(self, cluster_method: str = "k-means", n_clusters: int | None = None):
+    def __init__(self, cluster_method: str = "k-means", n_clusters = None):
         super().__init__()
 
         if cluster_method not in available_cluster_methods:
@@ -290,7 +287,7 @@ class DataClusterizer(Processor):
 
     def find_best_params_cluster(
         self, data: np.ndarray, str_model: str = "k-means"
-    ) -> dict | None:
+    ):
 
         if str_model == "dbscan":
             min_samples = np.arange(2, min(len(data[:, 0]), 25), step=2)
