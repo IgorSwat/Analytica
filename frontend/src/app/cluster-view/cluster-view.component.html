@@ -1,45 +1,137 @@
 <div class="content-container">
-    <div *ngIf="clusterInfo" class="cluster-content">
+
+    <div *ngIf="clusterData" class="double-side-content">
+        
         <div class="table-area">
-            <div style="display: flex; align-items: center;">
+
+            <div class="view-header">
                 <h1>Klasteryzacja</h1>
-                <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
-                    [title]="infoText1">info</button>
             </div>
+
+            <div class="input-container">
+                <div class="input-main">
+                    <div class="input-row">
+                        <label for="clusteringMethod">Metoda klasteryzacji:</label>
+                        <select id="clusteringMethod" name="clusteringMethodSelector"
+                        [(ngModel)]="clustering_method" (ngModelChange)="onMethodChange($event)">
+                            <option *ngFor="let option of availableMethods" [value]="option">{{ option }}</option>
+                        </select>
+                        <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                            [title]="clusteringMethodInfo">info</button>
+                    </div>
+                </div>
+                <div class="input-secondary">
+                    <div *ngIf="clustering_method == 'k-means' || clustering_method == 'agglomerate'" class="input-row">
+                        <label for="n_clusters">Liczba klastrów:</label>
+                        <input id="n_clusters" type="number" [(ngModel)]="n_clusters" class="form-control"
+                            [ngClass]="{'input-error': !validate_n_clusters()}">
+                        <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                            [title]="nClustersInfo">info</button>
+                    </div>
+                    <div *ngIf="clustering_method == 'dbscan'" class="input-row">
+                        <label for="eps">Epsilon:</label>
+                        <input id="eps" type="number" step="0.1" [(ngModel)]="eps" class="form-control"
+                            [ngClass]="{'input-error': !validate_eps()}">
+                        <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                            [title]="epsInfo">info</button>
+                    </div>
+                    <div *ngIf="clustering_method == 'dbscan'" class="input-row">
+                        <label for="min_samples">Min. liczba próbek:</label>
+                        <input id="min_samples" type="number" [(ngModel)]="min_samples" class="form-control"
+                            [ngClass]="{'input-error': !validate_min_samples()}">
+                        <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                            [title]="minSamplesInfo">info</button>
+                    </div>
+                    <div *ngIf="clustering_method == 'agglomerate'" class="input-row">
+                        <label for="linkage">Typ wiązania:</label>
+                        <select id="linkage" [(ngModel)]="linkage" name="linkageSelector">
+                            <option *ngFor="let option of availableLinkage" [value]="option">{{ option }}</option>
+                        </select>
+                        <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                            [title]="linkageInfo">info</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Klaster</th>
-                            <th>Główna składowa 1</th>
-                            <th>Główna składowa 2</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let feature of clusterInfo.columns; let idx = index">
-                            <td>
-                                {{feature}}
-                                <!-- <input type="checkbox" class="form-check-input" [(ngModel)]="featureStates[idx]"> -->
-                            </td>
-                            <td>{{clusterInfo.loads1[idx]}}</td>
-                            <td>{{clusterInfo.loads2[idx]}}</td>
-                        </tr>
-                    </tbody>
+                  <thead>
+                    <tr>
+                      <th>Row</th>
+                      <ng-container *ngFor="let column of clusterData.columns">
+                        <th>{{ column }}</th>
+                      </ng-container>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let row of clusterData.data; let rowIndex = index">
+                        <td>{{ rowIndex + 1 }}</td>
+                        <ng-container *ngFor="let cell of row">
+                            <td>{{ cell }}</td>
+                        </ng-container>
+                    </tr>
+                  </tbody>
                 </table>
             </div>
+
+            <button type="button" class="btn btn-primary action-button" title="Eksportuj dane" (click)="setDownloadMenuState(true)"
+            title="Pobierz dane z dołączonymi etykietami klastrów">
+                <div class="material-symbols-outlined action-button-inner">download</div>
+            </button>
         </div>
-        <div class="plot-area">
+
+        <div class="stats-area">
             <div *ngIf="plotImage" class="plot-container">
-                <img [src]="plotImage" alt="Wykres Cluster">
+                <img [src]="plotImage" alt="Wykres PCA">
                 <button type="button" class="btn btn-light material-symbols-outlined" (click)="saveImage()">download</button>
             </div>
-            <div class="plot-changer">
-                <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="prevPlot()">chevron_left</button>
-                <button type="button" class="btn btn-light material-symbols-outlined plot-button" (click)="nextPlot()">chevron_right</button>
+            <div class="stats-container">
+                <div class="stat-row">
+                    <h4>Ocena klasteryzacji</h4>
+                    <h3 [ngClass]="{
+                        'label-red': quality === 1,
+                        'label-orange': quality === 2,
+                        'label-green': quality === 3,
+                        'label-blue': quality === 4
+                    }">{{ qualityLabel }}</h3>
+                </div>
+                <div class="stat-row">
+                    <div class="metric-name-row">
+                        <p>Metryka Silhouette:</p>
+                        <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                            [title]="silhouetteInfo">info</button>
+                    </div>
+                    <p>{{ clusterData.silhouette }}</p>
+                </div>
+                <div class="stat-row">
+                    <div class="metric-name-row">
+                        <p>Metryka Davies-Bouldin:</p>
+                        <button type="button" class="material-symbols-outlined info-button" data-toggle="tooltip" data-place="left"
+                            [title]="daviesBouldinInfo">info</button>
+                    </div>
+                    <p>{{ clusterData.davies_bouldin }}</p>
+                </div>
             </div>
         </div>
+
     </div>
-    <div *ngIf="!clusterInfo" class="loading-label">
-        <p>Loading...</p>
+
+    <div *ngIf="!clusterData" class="error-label">
+        <h3>Ładowanie...</h3>
     </div>
+
+    <div class="action-field">
+        <button *ngIf="hasInputChanged()" (click)="refreshData()" type="button" 
+          class="btn btn-primary action-button action-button-highlight" title="Odśwież dane">
+          <div class="material-symbols-outlined action-button-inner">refresh</div>
+        </button>
+    </div>
+
+</div>
+
+<div *ngIf="downloadMenuState" class="download-menu">
+    <h1>Wybierz formę danych do pobrania:</h1>
+    <button type="button" class="btn btn-primary" (click)="downloadData(true)">Dane standardowe (przed PCA)</button>
+    <button type="button" class="btn btn-primary" (click)="downloadData(false)">Dane przetworzone (po PCA)</button>
+    <button type="button"class="btn btn-danger" (click)="setDownloadMenuState(false)">Anuluj</button>
 </div>

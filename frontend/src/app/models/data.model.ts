@@ -21,8 +21,14 @@ export interface PcaData extends BasicData {
   error: boolean;
 }
 
-export interface ClusterInfo {
-  columns: string[],
-  loads1: number[],
-  loads2: number[],
+export interface ClusterData extends BasicData {
+  clustering_method: string;
+  n_clusters: number;
+  eps: number;
+  min_samples: number;
+  linkage: string;
+
+  silhouette: number;
+  davies_bouldin: number;
+  quality: number;
 }

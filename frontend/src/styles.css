@@ -23,6 +23,15 @@
     margin: 0 20px;
 }
 
+.double-side-content {
+    width: 100%;
+    height: 100%;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 
 /* --------------------------
    Repeatable layout elements
@@ -126,6 +135,12 @@ tbody tr:nth-child(even) {
 
 .info-button:hover {
     color: rgb(139, 189, 202);
+}
+
+.info-button:focus,
+.info-button:active {
+    border: none;
+    outline: none;
 }
 
 

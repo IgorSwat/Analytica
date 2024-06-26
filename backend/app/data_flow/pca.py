@@ -64,7 +64,7 @@ class PcaPlotter(Processor):
             return None
 
         n_components = pca.components_.shape[0]
-        loadings = pca.components_.T
+        loadings = pca.components_
         explained_variance = pca.explained_variance_ratio_
 
         # Draw plot
@@ -102,7 +102,7 @@ class PcaPlotter(Processor):
 
     def __draw_heatmap(self, n_components, loadings):
         plt.figure(figsize=self.plot_size)
-        labels = self.feature_labels if self.feature_labels is not None else [f"Label {i+1}" for i in range(loadings.shape[0])]
+        labels = self.feature_labels if self.feature_labels is not None else [f"Label {i+1}" for i in range(loadings.shape[1])]
         sns.heatmap(loadings, annot=True, cmap="coolwarm",
                     xticklabels=labels,
                     yticklabels=[f"PC{i+1}" for i in range(n_components)])
@@ -126,7 +126,7 @@ class PcaPlotter(Processor):
         fig, ax = plt.subplots()
         ax.set_xlim(0, self.plot_size[0])
         ax.set_ylim(0, self.plot_size[1])
-        ax.set_title("PCA - Dwie pierwsze główne składowe")
+        ax.set_title("Pusty wykres - dane o niedostatecznej wymiarowości")
         ax.set_xlabel("Główna składowa 1")
         ax.set_ylabel("Główna składowa 2")
         plt.grid()

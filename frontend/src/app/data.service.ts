@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DataNormalization, DataVisualization, PcaData, ClusterInfo } from './models/data.model';
+import { ClusterData, DataNormalization, DataVisualization, PcaData} from './models/data.model';
 import { FeatureLabel } from './models/feature-types';
 
 @Injectable({
@@ -15,9 +15,9 @@ export class DataService {
   private getPcaDataUrl = 'http://localhost:5000/data/pca';
   private getPcaPlotUrl = 'http://localhost:5000/data/pca/plot';
   private updateFeatureSelectionUrl = 'http://localhost:5000/data/select-features';
-
-  private getClusterInfoUrl = 'http://localhost:5000/data/cluster/compute';
-  private getClusterPlotUrl = 'http://localhost:5000/data/cluster/plot';
+  private clusterizeDataUrl = 'http://localhost:5000/data/clustering';
+  private getClusterPlotUrl = 'http://localhost:5000/data/clustering/plot';
+  private downloadClusterDataUrl = 'http://localhost:5000/data/clustering/download';
 
   // A customizable field, will be replaced by user input in near future
   maxNoRecords: number = 100;
@@ -61,13 +61,24 @@ export class DataService {
     return this.http.get<any>(this.getPcaPlotUrl, {params});
   }
 
-  getClusterInfo() : Observable<ClusterInfo> {
-    return this.http.get<ClusterInfo>(this.getClusterInfoUrl, {});
+  clusterizeData(clustering_method: string, n_clusters: number, eps: number, min_samples: number, linkage: string) : Observable<ClusterData> {
+    const params = new HttpParams().appendAll({
+      'clustering_method': clustering_method,
+      'n_clusters': n_clusters,
+      'eps': eps,
+      'min_samples': min_samples,
+      'linkage': linkage
+    });
+    return this.http.get<ClusterData>(this.clusterizeDataUrl, {params});
   }
 
-  getClusterPlot(plotID: number) : Observable<any> {
-    const params = new HttpParams().set('plot_id', plotID.toString());
-    return this.http.get<any>(this.getClusterPlotUrl, {params});
+  getClusterPlot() : Observable<any> {
+    return this.http.get<any>(this.getClusterPlotUrl, {});
+  }
+
+  downloadClusterData(rawFlag: boolean = true) : Observable<any> {
+    const params = new HttpParams().set('raw_flag', rawFlag.toString());
+    return this.http.get(this.downloadClusterDataUrl, {responseType: 'blob', params: params});
   }
 
   updateFeatureSelection(featureStates: boolean[]): Observable<any> {

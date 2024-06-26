@@ -16,7 +16,7 @@ class DataNormalizer(Processor):
 
         if numeric_method not in available_numeric_methods:
             print("[DataNormalizer] Invalid numeric normalization method: " + numeric_method)
-            print("[DataNormalizer] Setting standard normalization method...")
+            print("[DataNormalizer] Setting 'standard' normalization method...")
             self.numeric_method = "standard"
         else:
             self.numeric_method = numeric_method

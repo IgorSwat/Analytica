@@ -1,5 +1,6 @@
 import csv
 import pandas as pd
+import numpy as np
 
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
@@ -13,6 +14,7 @@ from app.data_flow.data_loading import DataProvider
 from app.data_flow.types_extraction import FeatureTypeExtractor, FeatureType
 from app.data_flow.data_selection import DataSelector, FeatureSelector
 from app.data_flow.pca import PcaTransformer, PcaPlotter
+from app.data_flow.data_clustering import DataClusterizer, ClusterAnalyzer, ClusterPlotter
 
 
 app = Flask(__name__)
@@ -57,6 +59,7 @@ def upload_file():
         flow.set_processor("select_features_1", FeatureSelector())
         flow.set_processor("normalize_data", DataNormalizer())
         flow.set_processor("transform_pca", PcaTransformer())
+        flow.set_processor("analyze_clusters", ClusterAnalyzer())
         
         return {"message": "File processed successfully"}
 
@@ -189,14 +192,114 @@ def get_pca_data():
 def get_pca_plot():
     # Obtain plot index
     plot_id = request.args.get("plot_id", default=0, type=int)
-    flow.set_processor("plot_pca", PcaPlotter(plot_id))
+    df = flow.process("normalize_data")
+    cols = df.columns.values.tolist()
+    flow.set_processor("plot_pca", PcaPlotter(plot_id, feature_labels=cols))
 
     # Generate plot data
     binary_data = flow.process("plot_pca")
     if binary_data is None:
-        return jsonify({"error": f"Unable to generate plot nr {plot_id}"}), 400
+        return jsonify({"error": f"Unable to generate plot nr {plot_id}"}), 200
 
     return jsonify({'image': binary_data}), 200
+
+
+@app.route("/data/clustering", methods=['GET'])
+def get_clustering_results():
+    # Extract parameters and update processors if needed
+    clustering_method = request.args.get("clustering_method", default="k-means", type=str)
+    clustering_method = state_handler.correct_input(clustering_method, "clustering_method", "cluster_data")
+    if clustering_method is not None:
+        if clustering_method == "k-means":
+            n_clusters = request.args.get("n_clusters", default=2, type=int)
+            flow.set_processor("cluster_data",
+                               DataClusterizer(clustering_method, first_param=n_clusters))
+        elif clustering_method == "dbscan":
+            eps = request.args.get("eps", default=1.5, type=float)
+            min_samples = request.args.get("min_samples", default=2, type=int)
+            flow.set_processor("cluster_data",
+                               DataClusterizer(clustering_method, first_param=eps, second_param=min_samples))
+        else:
+            n_clusters = request.args.get("n_clusters", default=2, type=int)
+            linkage = request.args.get("linkage", default="ward", type=str)
+            flow.set_processor("cluster_data",
+                               DataClusterizer(clustering_method, first_param=n_clusters, second_param=linkage))
+
+    # Get transformed data
+    _, df = flow.process("transform_pca")
+
+    # Perform clustering and link results with data
+    labels = flow.process("cluster_data")
+    if labels is None:
+        return jsonify({"error": "Unable to perform clustering"}), 200
+
+    # Perform cluster analysis and obtain rest of the output values
+    clustering_method = flow.get_processor("cluster_data").clustering_method
+    n_clusters = flow.get_processor("cluster_data").first_param if clustering_method in ["k-means", "agglomerate"] else 1
+    eps = flow.get_processor("cluster_data").first_param if clustering_method == "dbscan" else 1.0
+    min_samples = flow.get_processor("cluster_data").second_param if clustering_method == "dbscan" else 2
+    linkage = flow.get_processor("cluster_data").second_param if clustering_method == "agglomerate" else "ward"
+    silhouette, davies_bouldin, quality = flow.process("analyze_clusters")
+
+    row_amt = df.shape[0]
+
+    # Add extra column
+    cluster_feature = "Klaster"
+    df[cluster_feature] = labels
+    row_amt = df.shape[0]
+    columns = df.columns.values.tolist()
+    data = df_to_json(df)
+
+    # Format labels column
+    for i in range(len(data)):
+        data[i][-1] = data[i][-1].split('.')[0]
+
+    # Remove the extra column
+    df.drop(cluster_feature, axis=1, inplace=True)
+
+    return jsonify(length=row_amt, columns=columns, data=data, clustering_method=clustering_method,
+                   n_clusters=n_clusters, eps=eps, min_samples=min_samples, linkage=linkage,
+                   silhouette=silhouette, davies_bouldin=davies_bouldin, quality=quality.value), 200
+
+
+@app.route("/data/clustering/plot", methods=["GET"])
+def get_cluster_plot():
+    clustering_method = request.args.get("clustering_method", default="k-means", type=str)
+    flow.set_processor("plot_clusters", ClusterPlotter(clustering_method))
+
+    # Generate plot data
+    binary_data = flow.process("plot_clusters")
+    if binary_data is None:
+        return jsonify({"error": f"Unable to generate clusters plot"}), 200
+
+    return jsonify({'image': binary_data}), 200
+
+
+@app.route("/data/clustering/download", methods=["GET"])
+def download_cluster_data():
+    raw_flag_str = request.args.get("raw_flag", default="true", type=str)
+    raw_flag = raw_flag_str.lower() == "true"
+
+    df = flow.process("select_features_1") if raw_flag is True else flow.process("transform_pca")[1]
+    labels = flow.process("cluster_data")
+    if df is None or labels is None:
+        return jsonify({"error": "No data"}), 400
+
+    # Add extra column
+    cluster_feature = "Klaster"
+    df[cluster_feature] = labels
+    csv_data = df.to_csv(index=False)
+    result = BytesIO(csv_data.encode("utf-8"))
+
+    # Remove extra column
+    df.drop(cluster_feature, axis=1, inplace=True)
+
+    return send_file(
+        result,
+        mimetype='text/csv',
+        download_name='data.csv',
+        as_attachment=True
+    )
     
 
 if __name__ == "__main__":

@@ -10,7 +10,8 @@ class StateHandler:
     inputs = {
         "selection": ("xxxxx", "1-100"),
         "numeric_method": ("", "standard"),
-        "n_components": (0, 2)
+        "n_components": (0, 2),
+        "clustering_method": ("", "k-means")
     }
 
     saved_inputs = {}
@@ -26,7 +27,7 @@ class StateHandler:
         states["nav-data"] = self.flow.get_processor("raw_data") is not None
         states["nav-normalize"] = states["nav-data"]
         states["nav-pca"] = states["nav-data"]
-        states["nav-clusters"] = False  # Just for now...
+        states["nav-clusters"] = states["nav-data"]
 
         return states
 

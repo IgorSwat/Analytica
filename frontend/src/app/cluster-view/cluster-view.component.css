@@ -1,126 +1,112 @@
-.cluster-content {
-    width: 100%;
-    height: 760px;
-    margin-top: 20px;
-    padding: 0 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+.error-label {
+    padding: 340px 0;
 }
 
-.loading-label {
-    width: 100%;
-    padding: 370px 0;
-    text-align: center;
-}
+
+/* -----------------
+   Table area styles 
+   ----------------- */
 
 .table-area {
-    height: auto;
+    width: 1000px;
     position: relative;
-    border-radius: 8px;
-    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.table-container {
-    max-height: 680px;
-    position: relative;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.input-container {
+    width: 90%;
+    height: 140px;
+    margin-top: 20px;
+    margin-bottom: 50px;
 }
 
-.table-area h1 {
-    margin: 0 0 20px 0;
+.input-row {
+    margin-right: 60px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
-.info-button {
-    position: relative;
-    transform: translateY(-15%);
-    margin-left: 10px;
-    font-size: 26px;
-    outline: none;
-    color: gray;
-    border: none;
-    background: none;
+.input-row label {
+    margin: 0 15px 0 0;
+    font-size: 16px;
+    color: #333333;
+}
+
+.input-row select {
+    width: 200px;
+    padding: 5px;
+    border: 1px solid #1e90ff;
+    border-radius: 5px;
+    background-color: #f0f8ff;
+    color: #333333;
+    font-size: 14px;
     cursor: pointer;
 }
-.info-button:hover {
-    color: rgb(139, 189, 202);
+
+.input-row input {
+    width: 60px;
+    height: 46px;
+    font-size: 14px;
 }
 
-table {
+.input-row .info-button {
+    margin-left: 10px;
+}
+
+.input-main {
     width: 100%;
-    min-width: 100%;
-    border-collapse: collapse;
-    margin: 0 0 10px 0;
+    padding: 20px 5px;
+    border-bottom: 3px groove rgba(0, 0, 0, 0.651);
 }
 
-thead {
-    position: sticky;
-    top: 0px;
-    z-index: 1;
+.input-main .input-row label {
+    font-size: 20px;
 }
 
-th, td {
-    min-width: 240px;
-    border: 1px solid #e3e6f0;
-    padding: 12px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-td input {
-    position: relative;
-    margin: 0 0 0 10px;
-}
-
-th:first-child, td:first-child {
-    min-width: 280px;
-}
-
-th {
-    background-color: #0056b3;
-    color: white;
+.input-main .input-row select {
     font-size: 16px;
 }
 
-tbody tr:nth-child(odd) {
-    background-color: #f4f4f4;
+.input-secondary {
+    padding: 12px 5px;
+    display: flex;
+    flex-direction: row;
 }
 
-tbody tr:nth-child(even) {
-    background-color: #ffffff;
+.table-container {
+    height: 500px;
 }
 
-.save-button {
-    padding: 5px 5px 0 5px;
+.table-area .action-button {
     position: absolute;
-    right: 32px;
-    bottom: 25px;
-    border-width: 4px;
-    border-style: groove;
-    border-color: #003670;
-    box-shadow: 0 0 40px rgba(0, 238, 255, 0.7);
+    top: 705px;
+    right: 28px;
+    z-index: 2;
 }
 
-.save-button div {
-    font-size: 40px;
+.table-area .action-button-inner {
+    font-size: 36px;
 }
 
 
+/* -----------------
+   Stats area styles 
+   ----------------- */
 
-/* Plot area styles */
-
-.plot-area {
-    max-height: 700px;
+.stats-area {
+    max-height: 800px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.185);
 }
 
 .plot-container {
+    margin-bottom: 40px;
     position: relative;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.185);
 }
 
 .plot-container button {
@@ -131,22 +117,102 @@ tbody tr:nth-child(even) {
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
-.plot-area img {
-    width: 880px;
-    height: 680px;
+.plot-container img {
+    width: 700px;
+    height: 580px;
 }
 
-.plot-changer {
-    width: 400px;
-    margin-top: 30px;
+.stats-container {
+    width: 700px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-row {
+    width: 100%;
     display: flex;
     flex-direction: row;
+    align-items: center;
     justify-content: space-between;
 }
 
-.plot-button {
-    font-size: 36px;
+.stat-row:first-child {
+    margin-bottom: 10px;
+    border-bottom: 2px groove rgba(0, 0, 0, 0.651);
+}
+
+.stat-row h3 {
+    text-shadow: 2px 2px rgba(0, 0, 0, 0.23);
+}
+
+.stat-row p {
+    font-size: 18px;
+    margin: 0;
+}
+
+.metric-name-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.metric-name-row p {
+    font-style: italic;
+}
+
+.metric-name-row button {
+    font-size: 18px;
+}
+
+.label-red {
+    color: red;
+}
+
+.label-orange {
+    color: orange;
+}
+
+.label-green {
+    color: rgb(130, 255, 47);
+}
+
+.label-blue {
+    color: rgb(0, 204, 255);
+}
+
+
+/* --------------------
+   Download menu styles 
+   -------------------- */
+
+.download-menu {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(240, 255, 255, 0.849);
+    z-index: 3;
+}
+
+.download-menu h1 {
+    margin-bottom: 40px;
+}
+
+.download-menu button {
+    width: 350px;
+    height: 60px;
+    margin-bottom: 20px;
+    font-size: 20px;
     font-weight: bold;
-    padding: 0px 8px;
-    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.download-menu button:last-child {
+    width: 120px;
+    height: 50px;
+    margin-top: 20px;
 }

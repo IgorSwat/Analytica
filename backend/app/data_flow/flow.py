@@ -11,10 +11,9 @@ EXTRACT_TYPES_NODE = ("extract_f_types", "f_types")
 NORMALIZE_DATA_NODE = ("normalize_data", "df_normalized")
 TRANSFORM_PCA_NODE = ("transform_pca", "pca_data")
 PLOT_PCA_NODE = ("plot_pca", "plot_data")
-# CLUSTER_DATA_NODE = ("cluster_data", "df_clustered")
-# GET_PCA_NODE = ("return_pca_data", "pca_data")
-# PLOT_CLUSTER_NODE = ("plot_cluster", "plot_cluster_data")
-
+CLUSTER_DATA_NODE = ("cluster_data", "labels")
+ANALYZE_CLUSTERS_NODE = ("analyze_clusters", "stats")
+PLOT_CLUSTERS_NODE = ("plot_clusters", "plot_data")
 # ........
 
 
@@ -69,10 +68,9 @@ class DataFlow:
             NORMALIZE_DATA_NODE[0]: DataNode(NORMALIZE_DATA_NODE),
             TRANSFORM_PCA_NODE[0]: DataNode(TRANSFORM_PCA_NODE),
             PLOT_PCA_NODE[0]: DataNode(PLOT_PCA_NODE),
-            # GET_PCA_NODE[0]: DataNode(GET_PCA_NODE),
-            # CLUSTER_DATA_NODE[0]: DataNode(CLUSTER_DATA_NODE),
-            # PLOT_CLUSTER_NODE[0]: DataNode(PLOT_CLUSTER_NODE),
-
+            CLUSTER_DATA_NODE[0]: DataNode(CLUSTER_DATA_NODE),
+            ANALYZE_CLUSTERS_NODE[0]: DataNode(ANALYZE_CLUSTERS_NODE),
+            PLOT_CLUSTERS_NODE[0]: DataNode(PLOT_CLUSTERS_NODE)
         }
 
         # Define connections (edges in directed, acyclic graph)
@@ -83,11 +81,11 @@ class DataFlow:
         self.__make_connection(EXTRACT_TYPES_NODE[0], NORMALIZE_DATA_NODE[0])
         self.__make_connection(NORMALIZE_DATA_NODE[0], TRANSFORM_PCA_NODE[0])
         self.__make_connection(TRANSFORM_PCA_NODE[0], PLOT_PCA_NODE[0])
-        # self.__make_connection(NORMALIZE_DATA_NODE[0], GET_PCA_NODE[0])
-        # self.__make_connection(GET_PCA_NODE[0], CLUSTER_DATA_NODE[0])
-        # self.__make_connection(NORMALIZE_DATA_NODE[0], CLUSTER_DATA_NODE[0])
-        # self.__make_connection(CLUSTER_DATA_NODE[0], PLOT_CLUSTER_NODE[0])
-
+        self.__make_connection(TRANSFORM_PCA_NODE[0], CLUSTER_DATA_NODE[0])
+        self.__make_connection(TRANSFORM_PCA_NODE[0], ANALYZE_CLUSTERS_NODE[0]),
+        self.__make_connection(TRANSFORM_PCA_NODE[0], PLOT_CLUSTERS_NODE[0])
+        self.__make_connection(CLUSTER_DATA_NODE[0], ANALYZE_CLUSTERS_NODE[0])
+        self.__make_connection(CLUSTER_DATA_NODE[0], PLOT_CLUSTERS_NODE[0])
 
 
     # This function process all the nodes that lead do node_id in the graph, by performing backpropagation
