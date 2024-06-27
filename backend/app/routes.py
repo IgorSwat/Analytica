@@ -6,8 +6,8 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from io import BytesIO
 
-from conversions import df_to_json, f_properties_to_list, f_properties_from_list
-from state_control import StateHandler
+from app.conversions import df_to_json, f_properties_to_list, f_properties_from_list
+from app.state_control import StateHandler
 from app.data_flow.data_normalization import DataNormalizer
 from app.data_flow.flow import DataFlow
 from app.data_flow.data_loading import DataProvider
@@ -300,7 +300,8 @@ def download_cluster_data():
         download_name='data.csv',
         as_attachment=True
     )
-    
 
-if __name__ == "__main__":
+
+def main():
     app.run(debug=True, host="localhost")
+
