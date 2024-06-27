@@ -41,3 +41,10 @@ It allows you to extract processed data in the form of a .csv file. The processe
 ## Setup and launch
 To run application on your PC follow these steps:
 1. Go to ***/backend*** directory. Install necessary dependencies from ***requirements.txt*** file: `pip install -r requirements.txt`. <br>Recommended version of Python: **3.9**.
+2. Run backend server by excetuing ***run.py***: `python run.py`
+3. Return to root directory and go to ***/frontend*** subdirectory.
+4. *(Optional - if you haven't done it yet)* Download and install **Node.js** and **npm** package menager.
+5. *(Optional - if you haven't done it yet)* Install Angular CLI: `npm install -g @angular/cli`
+6. Install necessary dependencies using: `npm install`
+7. Run Angular development server by excetuing `ng serve`. Launch your browser and go to the address indicated by the CLI.
+8. Select and load a .csv file with data you want to analyze.
