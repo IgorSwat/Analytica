@@ -39,4 +39,5 @@ It allows you to extract processed data in the form of a .csv file. The processe
 <br>
 
 ## Setup and launch
-To be continued...
+To run application on your PC follow these steps:
+1. Go to ***/backend*** directory. Install necessary dependencies from ***requirements.txt*** file: `pip install -r requirements.txt`. <br>Recommended version of Python: **3.9**.
